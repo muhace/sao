@@ -1,0 +1,930 @@
+--https://v3rmillion.net/showthread.php?tid=519726
+Workspace.Gravity = 196.2
+
+local green,red=Color3.fromRGB(0,240,0),Color3.fromRGB(240,0,0)
+local maxSpeed = 350 --max studs/s by anti exploit
+local settings = {doMuseum=true,doJewl=true,doBank=true,doTrain=true,bankRadius=31,jewlAllowCrims=false,noclipEsc=true}
+if not getrawmetatable then
+	local h = Instance.new("Hint",workspace)
+	h.Text = "Incompatible exploit."
+	wait(2)
+	h:Destroy()
+	return
+end
+if readfile then
+	pcall(function()
+		local new = game:GetService("HttpService"):JSONDecode(readfile("JBAR.txt"))
+		--corruption?
+		local doOverwrite=false
+		for k,v in pairs(new) do
+			if settings[k]==nil then
+				doOverwrite=true
+				new[k]=nil
+			end
+		end
+		for k,v in pairs(settings) do
+			if new[k]==nil then
+				doOverwrite=true
+				new[k]=v
+			end
+		end
+		--use input
+		if doOverwrite then
+			warn("Settings overwritten")
+			writefile("JBAR.txt",game:GetService("HttpService"):JSONEncode(new))
+		end
+		settings = new
+	end)
+end
+
+--interface
+Create = function(class,parent,props)
+	local new = Instance.new(class)
+	for k,v in next,props do
+		new[k]=v
+	end
+	new.Parent = parent
+	return new
+end
+
+gui=Create("ScreenGui",game.CoreGui,{Name="AutoRob", ResetOnSpawn=false})
+main=Create("Frame",gui,{Name="main", Active=true, Draggable=true, Size=UDim2.new(0,350,0,234), Position=UDim2.new(0.2,-94,0.2,144), ZIndex=3, BackgroundColor3=Color3.new(0.000,0.157,0.314)})
+Frame=Create("Frame",main,{BackgroundTransparency=1, Size=UDim2.new(1,-50,1,-50), Position=UDim2.new(0,25,0,25), ZIndex=4})
+AbortBtn=Create("TextButton",Frame,{Name="AbortBtn", ZIndex=5, Size=UDim2.new(0.5,0,0.185,0), Text="ABORT", Font="SourceSans", Style="RobloxRoundButton", 
+	Position=UDim2.new(0.25,0,0.6,-5), TextSize=25})
+Status=Create("TextLabel",Frame,{Name="Status", ZIndex=5, Size=UDim2.new(1,0,0.185,0), Text="Status:", TextSize=15, TextXAlignment="Left", 
+	Font="Code", BackgroundTransparency=0.25, Position=UDim2.new(0,0,0.8,0), BackgroundColor3=Color3.new(1,1,1)})
+Frame_2=Create("Frame",Frame,{BackgroundTransparency=1, Size=UDim2.new(0.94,0,0.43,0), Position=UDim2.new(0.03,0,0.07,0), ZIndex=5, BackgroundColor3=Color3.new(1,1,1)})
+MuseumBtn=Create("TextButton",Frame_2,{Name="MuseumBtn", TextWrapped=true, ZIndex=5, Size=UDim2.new(0,135,0,33), TextColor3=Color3.new(0.118,0.118,0.118), Text="Museum", 
+	Font="SourceSansLight", TextSize=24, BackgroundColor3=settings.doMuseum and green or red})
+Shade=Create("Frame",MuseumBtn,{Name="Shade", BackgroundTransparency=0.93999999761581, Size=UDim2.new(1,0,0.5,0), Position=UDim2.new(0,0,0.5,0), ZIndex=6, BackgroundColor3=Color3.new()})
+JewlBtn=Create("TextButton",Frame_2,{Name="JewlBtn", TextWrapped=true, ZIndex=5, Size=UDim2.new(0,135,0,33), TextColor3=Color3.new(0.118,0.118,0.118), Text="Jewelry", 
+	Font="SourceSansLight", Position=UDim2.new(1,-135,0,0), TextSize=24, BackgroundColor3=settings.doJewl and green or red})
+Shade_2=Create("Frame",JewlBtn,{Name="Shade", BackgroundTransparency=0.93999999761581, Size=UDim2.new(1,0,0.5,0), Position=UDim2.new(0,0,0.5,0), ZIndex=6, BackgroundColor3=Color3.new()})
+TrainBtn=Create("TextButton",Frame_2,{Name="TrainBtn", TextWrapped=true, ZIndex=5, Size=UDim2.new(0,135,0,33), TextColor3=Color3.new(0.118,0.118,0.118), Text="Train", 
+	Font="SourceSansLight", Position=UDim2.new(0,0,1,-33), TextSize=24, BackgroundColor3=settings.doTrain and green or red})
+Shade_3=Create("Frame",TrainBtn,{Name="Shade", BackgroundTransparency=0.93999999761581, Size=UDim2.new(1,0,0.5,0), Position=UDim2.new(0,0,0.5,0), ZIndex=6, BackgroundColor3=Color3.new()})
+BankBtn=Create("TextButton",Frame_2,{Name="BankBtn", TextWrapped=true, ZIndex=5, Size=UDim2.new(0,135,0,33), TextColor3=Color3.new(0.118,0.118,0.118), Text="Bank", 
+	Font="SourceSansLight", Position=UDim2.new(1,-135,1,-33), TextSize=24, BackgroundColor3=settings.doBank and green or red})
+Shade_4=Create("Frame",BankBtn,{Name="Shade", BackgroundTransparency=0.93999999761581, Size=UDim2.new(1,0,0.5,0), Position=UDim2.new(0,0,0.5,0), ZIndex=6, BackgroundColor3=Color3.new()})
+CloseBtn=Create("TextButton",main,{Name="CloseBtn", TextWrapped=true, TextStrokeTransparency=0.69999998807907, ZIndex=4, Size=UDim2.new(0,20,0,20), TextColor3=Color3.new(1,1,1), 
+	Text="X", BackgroundTransparency=1, Font="SourceSansBold", Position=UDim2.new(1,-20,0,0), TextScaled=true})
+CogBtn=Create("ImageButton",main,{Name="CogBtn", Image="rbxassetid://135740223", ZIndex=4, Size=UDim2.new(0,20,0,20), BackgroundTransparency=1})
+setsframe=Create("Frame",main,{Name="setsframe", BorderColor3=Color3.new(0.000,0.157,0.314), BackgroundTransparency=0.019999999552965, Size=UDim2.new(0,240,0,130), Position=UDim2.new(0,50,1,-135), BorderSizePixel=5, 
+	BackgroundColor3=Color3.new(1,1,1)})
+Frame_3=Create("Frame",setsframe,{BackgroundTransparency=1, Size=UDim2.new(1,0,0.25,0)})
+Frame_4=Create("Frame",Frame_3,{BackgroundTransparency=1, Size=UDim2.new(1,-10,1,-10), Position=UDim2.new(0,5,0,5)})
+Label=Create("TextLabel",Frame_4,{TextWrapped=true, Size=UDim2.new(0.8,0,1,0), Text="Bank Cops Safety Radius", Font="SourceSans", BackgroundTransparency=1, TextScaled=true})
+BankRadiusBox=Create("TextBox",Frame_4,{Name="BankRadiusBox", TextWrapped=true, Size=UDim2.new(0,30,0,15), Text=tostring(settings.bankRadius), Font="Code", Position=UDim2.new(0.83,0,0.2,0), 
+	TextScaled=true, BackgroundColor3=Color3.new(1,1,1)})
+Frame_5=Create("Frame",setsframe,{BackgroundTransparency=0.94999998807907, Size=UDim2.new(1,0,0.25,0), Position=UDim2.new(0,0,0.25,0), BackgroundColor3=Color3.new()})
+Frame_6=Create("Frame",Frame_5,{BackgroundTransparency=1, Size=UDim2.new(1,-10,1,-10), Position=UDim2.new(0,5,0,5)})
+Label_2=Create("TextLabel",Frame_6,{TextWrapped=true, Size=UDim2.new(0.8,0,1,0), Text="Let Crims Enter Jewelry", Font="SourceSans", BackgroundTransparency=1, TextScaled=true})
+JewlSetBtn=Create("TextButton",Frame_6,{Name="JewlSetBtn", Size=UDim2.new(0,20,0,15), Text=settings.jewlAllowCrims and "X" or "", Font="SourceSansSemibold", Position=UDim2.new(0.85,0,0.2,0), TextSize=20, 
+	BackgroundColor3=Color3.new(1,1,1)})
+Frame_7=Create("Frame",setsframe,{BackgroundTransparency=1, Size=UDim2.new(1,0,0.25,0), Position=UDim2.new(0,0,0.5,0)})
+Frame_8=Create("Frame",Frame_7,{BackgroundTransparency=1, Size=UDim2.new(1,-10,1,-10), Position=UDim2.new(0,5,0,5)})
+Label_3=Create("TextLabel",Frame_8,{TextWrapped=true, Size=UDim2.new(0.8,0,1,0), Text="Noclip For Better AFK", Font="SourceSans", BackgroundTransparency=1, TextScaled=true})
+EscSetBtn=Create("TextButton",Frame_8,{Name="EscSetBtn", Size=UDim2.new(0,20,0,15), Text=settings.noclipEsc and "X" or "", Font="SourceSansSemibold", Position=UDim2.new(0.85,0,0.2,0), TextSize=20, 
+	BackgroundColor3=Color3.new(1,1,1)})
+Frame_9=Create("Frame",setsframe,{BackgroundTransparency=0.94999998807907, Size=UDim2.new(1,0,0.25,0), Position=UDim2.new(0,0,0.75,0), BackgroundColor3=Color3.new()})
+SaveSetsBtn=Create("TextButton",Frame_9,{Name="SaveSetsBtn", Size=UDim2.new(0.8,0,0.9,0), Text=writefile and "Save Defaults" or "Save Unsupported", Font="SourceSans", Style=writefile and "RobloxRoundDefaultButton" or "RobloxRoundButton", Position=UDim2.new(0.1,0,0.05,0), 
+	TextSize=25})
+title=Create("TextLabel",main,{Name="title", TextWrapped=true, ZIndex=4, Size=UDim2.new(0.5,0,0,20), Text="Jailbreak Auto-Rob", TextSize=18, 
+	Font="SourceSans", BackgroundTransparency=1, Position=UDim2.new(0.24,0,0,0), TextColor3=Color3.new(1,1,1), BackgroundColor3=Color3.new(1,1,1)})
+Slider=Create("Frame",main,{Name="Slider", Size=UDim2.new(0,40,0,16), Position=UDim2.new(0,25,0,2), ZIndex=4, BackgroundColor3=Color3.new(1,1,1)})
+toggleOff=Create("TextButton",Slider,{Name="toggleOff", ZIndex=5, BorderSizePixel=0, Size=UDim2.new(0.5,0,1,0), TextColor3=Color3.new(), Text="", 
+	Font="SourceSans", TextSize=14, BackgroundColor3=Color3.new(.25,.25,.25), AutoButtonColor=false})
+toggleOn=Create("TextButton",Slider,{Name="toggleOn", ZIndex=5, BorderSizePixel=0, Size=UDim2.new(0.5,0,1,0), TextColor3=Color3.new(), Text="", 
+	Font="SourceSans", Position=UDim2.new(0.5,0,0,0), TextSize=14, BackgroundColor3=Color3.new(.39,.39,.39), AutoButtonColor=false})
+slide=Create("Frame",Slider,{Name="slide", Size=UDim2.new(0,6,1,0), Position=UDim2.new(0.5,-3,0,0), ZIndex=6, BorderSizePixel=0, BackgroundColor3=Color3.new(0.8,0.8,0.8)})
+
+Label=Create("TextLabel",Frame_2,{TextWrapped=true, TextStrokeTransparency=0.80000001192093, ZIndex=5, Size=UDim2.new(1.0,0,0.195,0), Text="Ver V1.8f (Modified By TuleybTR#5342 Fixes)", Font="SourceSans", 
+BackgroundTransparency=1, Position=UDim2.new(0,0,-0.15,-5), TextColor3=Color3.new(1,1,1), TextScaled=true})
+
+player = game:GetService("Players").LocalPlayer
+local root,uptorso
+local abort=false
+local v30=Vector3.new()
+--gui code
+CloseBtn.MouseButton1Click:Connect(function() gui:Destroy() abort=true end)
+CloseBtn.MouseEnter:Connect(function() CloseBtn.TextColor3=red end)
+CloseBtn.MouseLeave:Connect(function() CloseBtn.TextColor3=Color3.new(1,1,1) end)
+local stepconn
+
+MuseumBtn.MouseButton1Click:Connect(function()
+	if museumEvent then
+		settings.doMuseum = not settings.doMuseum
+		MuseumBtn.BackgroundColor3=settings.doMuseum and green or red
+	else
+		local h = Instance.new("Hint",workspace)
+		h.Text = "Incompatible exploit."
+		wait(2)
+		h:Destroy()
+	end
+end)
+JewlBtn.MouseButton1Click:Connect(function()
+	settings.doJewl = not settings.doJewl
+	JewlBtn.BackgroundColor3=settings.doJewl and green or red
+end)
+BankBtn.MouseButton1Click:Connect(function()
+	settings.doBank = not settings.doBank
+	BankBtn.BackgroundColor3=settings.doBank and green or red
+end)
+TrainBtn.MouseButton1Click:Connect(function()
+	settings.doTrain = not settings.doTrain
+	TrainBtn.BackgroundColor3=settings.doTrain and green or red
+end)
+local function toggleCanAbort(bool)
+	AbortBtn.AutoButtonColor=bool
+	AbortBtn.Style=bool and "RobloxRoundDefaultButton" or "RobloxRoundButton"
+	abort=false
+end
+
+AbortBtn.MouseButton1Click:Connect(function()
+	if AbortBtn.AutoButtonColor==true then
+		toggleCanAbort(false)
+		if stepconn then stepconn:Disconnect() end
+		local hit,p = workspace:FindPartOnRay(Ray.new(player.Character.Head.Position+Vector3.new(0,10,0),Vector3.new(0,20,0)))
+		if hit then
+			player.Character:MoveTo(p)
+		else
+			root.CFrame=root.CFrame+Vector3.new(-40,2,0)
+		end
+		abort=true
+		AbortBtn.Text = "Aborted."
+		wait(5.4)
+		AbortBtn.Text = "ABORT"
+		
+	end
+end)
+local function stprint(txt)
+	Status.Text = "Status: "..txt
+end
+local function strToNum(str)
+	return tonumber((tostring(str):gsub("[^%d]", "")))
+end
+
+local tweenCogOut = game:GetService("TweenService"):Create(CogBtn,TweenInfo.new(0.25),{Rotation=135})
+local tweenCogIn = game:GetService("TweenService"):Create(CogBtn,TweenInfo.new(0.25),{Rotation=0})
+local cogOut = false
+CogBtn.MouseButton1Click:Connect(function()
+	cogOut = not cogOut
+	if cogOut then
+		setsframe:TweenPosition(UDim2.new(0,50,1,0),nil,"Quart",0.3,true)
+		tweenCogOut:Play()
+	else
+		setsframe:TweenPosition(UDim2.new(0,50,1,-135),nil,"Quart",0.3,true)
+		tweenCogIn:Play()
+	end
+end)
+local bankBoxOld=BankRadiusBox.Text
+BankRadiusBox:GetPropertyChangedSignal("Text"):Connect(function()
+	BankRadiusBox.Text=BankRadiusBox.Text:sub(1,4)
+	local num = tonumber(BankRadiusBox.Text)
+	if num then
+		if num>99 then
+			BankRadiusBox.Text = '99'
+		end
+	elseif BankRadiusBox.Text~='' then
+		BankRadiusBox.Text = bankBoxOld
+	end
+	bankBoxOld = BankRadiusBox.Text
+end)
+BankRadiusBox.FocusLost:Connect(function()
+	if tonumber(BankRadiusBox.Text) then
+		settings.bankRadius=tonumber(BankRadiusBox.Text)
+	end
+	BankRadiusBox.Text=tostring(settings.bankRadius)
+end)
+JewlSetBtn.MouseButton1Click:Connect(function()
+	settings.jewlAllowCrims = not settings.jewlAllowCrims
+	JewlSetBtn.Text = settings.jewlAllowCrims and "X" or ""
+end)
+EscSetBtn.MouseButton1Click:Connect(function()
+	settings.noclipEsc = not settings.noclipEsc
+	EscSetBtn.Text = settings.noclipEsc and "X" or ""
+end)
+SaveSetsBtn.MouseButton1Click:Connect(function()
+	if writefile and SaveSetsBtn.Style.Name=="RobloxRoundDefaultButton" then
+		SaveSetsBtn.Style="RobloxRoundButton"
+		writefile("JBAR.txt",game:GetService("HttpService"):JSONEncode(settings))
+		SaveSetsBtn.Text="Saved."
+		wait(1)
+		SaveSetsBtn.Text="Save Defaults"
+		SaveSetsBtn.Style="RobloxRoundDefaultButton"
+	end
+end)
+toggleOff.MouseButton1Down:Connect(function()
+	settings.doMuseum=false
+	settings.doJewl=false
+	settings.doTrain=false
+	settings.doBank=false
+	MuseumBtn.BackgroundColor3=red
+	JewlBtn.BackgroundColor3=red
+	TrainBtn.BackgroundColor3=red
+	BankBtn.BackgroundColor3=red
+	slide:TweenPosition(UDim2.new(),nil,"Sine",0.15,true)
+	wait(1)
+	if slide.Position.X.Scale<.01 then
+		slide:TweenPosition(UDim2.new(0.5,-3,0,0),nil,"Sine",0.15,true)
+	end
+end)
+toggleOn.MouseButton1Down:Connect(function()
+	if museumEvent then
+		settings.doMuseum=true
+		MuseumBtn.BackgroundColor3=green
+	end
+	settings.doJewl=true
+	settings.doTrain=true
+	settings.doBank=true
+	JewlBtn.BackgroundColor3=green
+	TrainBtn.BackgroundColor3=green
+	BankBtn.BackgroundColor3=green
+	slide:TweenPosition(UDim2.new(1,-6,0,0),nil,"Sine",0.15,true)
+	wait(1)
+	if slide.Position.X.Scale>.99 then
+		slide:TweenPosition(UDim2.new(0.5,-3,0,0),nil,"Sine",0.15,true)
+	end
+end)
+--main code
+local windowFocused = false
+game:GetService("UserInputService").WindowFocused:Connect(function() windowFocused=true end)
+game:GetService("UserInputService").WindowFocusReleased:Connect(function() windowFocused=false end)
+spawn(function()
+	game:GetService("UserInputService").InputBegan:Wait()
+	windowFocused=true
+end)
+
+screnv={}
+do
+	local I1Ii1llIiI1liIil1ll = 1 local lIliliiiIIli11iiliIlI = {} local function i11IllII1i1liliI1Il(liIIliIIllll1iliIii) local function llIiii11lIii1iliiII() local I1Iili1I1lI1ii1l1ii = liIIliIIllll1iliIii:byte(I1Ii1llIiI1liIil1ll, I1Ii1llIiI1liIil1ll) I1Ii1llIiI1liIil1ll = I1Ii1llIiI1liIil1ll + 1 return I1Iili1I1lI1ii1l1ii end local function iIIiIiI1I111I111lil() local I1Iili1I1lI1ii1l1ii, iiilili1IIii1i11lIi, lIlIlIilIIii1lIll1Ill, lIllIilIilII1i1Ii1l1l = liIIliIIllll1iliIii:byte(I1Ii1llIiI1liIil1ll, I1Ii1llIiI1liIil1ll + 3) I1Ii1llIiI1liIil1ll = I1Ii1llIiI1liIil1ll + 4 return lIllIilIilII1i1Ii1l1l * 16777216 + lIlIlIilIIii1lIll1Ill * 65536 + iiilili1IIii1i11lIi * 256 + I1Iili1I1lI1ii1l1ii end local function lIll1i1I1II1lIIi11Iil(II1li1i1liliiIIiIl1, IiIIliliIi1I11iilil, lIlil1Ii1iiI1Ii1iI1II) if lIlil1Ii1iiI1Ii1iI1II then local IIllll1I1ll1i1Il11i, i11iiIlill1I1ilIi1I = 0, 0 for illll1IIIlliiii1iii = IiIIliliIi1I11iilil, lIlil1Ii1iiI1Ii1iI1II do IIllll1I1ll1i1Il11i = IIllll1I1ll1i1Il11i + 2 ^ i11iiIlill1I1ilIi1I * lIll1i1I1II1lIIi11Iil(II1li1i1liliiIIiIl1, illll1IIIlliiii1iii) i11iiIlill1I1ilIi1I = i11iiIlill1I1ilIi1I + 1 end return IIllll1I1ll1i1Il11i else local I1I1ilIliiIlll1I1Ii = 2 ^ (IiIIliliIi1I11iilil - 1) return I1I1ilIliiIlll1I1Ii <= II1li1i1liliiIIiIl1 % (I1I1ilIliiIlll1I1Ii + I1I1ilIliiIlll1I1Ii) and 1 or 0 end end local function Ii11IlIiII1I1IlliiI() local I1Iili1I1lI1ii1l1ii, iiilili1IIii1i11lIi = iIIiIiI1I111I111lil(), iIIiIiI1I111I111lil() if I1Iili1I1lI1ii1l1ii == 0 and iiilili1IIii1i11lIi == 0 then return 0 end return (-2 * lIll1i1I1II1lIIi11Iil(iiilili1IIii1i11lIi, 32) + 1) * 2 ^ (lIll1i1I1II1lIIi11Iil(iiilili1IIii1i11lIi, 21, 31) - 1023) * ((lIll1i1I1II1lIIi11Iil(iiilili1IIii1i11lIi, 1, 20) * 4294967296 + I1Iili1I1lI1ii1l1ii) / 4503599627370496 + 1) end local function IIiII11lI1iliiIllIl(iIi1lIlillIiiil1I1i) local lilIilIi1Il11IIilII = liIIliIIllll1iliIii:sub(I1Ii1llIiI1liIil1ll, I1Ii1llIiI1liIil1ll + iIi1lIlillIiiil1I1i - 1) I1Ii1llIiI1liIil1ll = I1Ii1llIiI1liIil1ll + iIi1lIlillIiiil1I1i return lilIilIi1Il11IIilII end local function lIllIIIi1I1Illl1Il1(lilIl1iI1IiIiiIlIi1) local lIl1iiiII1ll11ilil1i1 = { liIIliIIllll1iliIii:byte(I1Ii1llIiI1liIil1ll, I1Ii1llIiI1liIil1ll + 3) } I1Ii1llIiI1liIil1ll = I1Ii1llIiI1liIil1ll + 4 local l1Il11I1Ii111I11III = {} for illll1IIIlliiii1iii = 1, 8 do l1Il11I1Ii111I11III[illll1IIIlliiii1iii] = lIll1i1I1II1lIIi11Iil(lilIl1iI1IiIiiIlIi1, illll1IIIlliiii1iii) end local IlIil1ilii1I1lillII = "" for illll1IIIlliiii1iii = 1, 4 do local IIllll1I1ll1i1Il11i, i11iiIlill1I1ilIi1I = 0, 0 for i1Il1lIililIli1i1I1 = 1, 8 do local i1il1i1iIIi1i1iiIiI = lIll1i1I1II1lIIi11Iil(lIl1iiiII1ll11ilil1i1[illll1IIIlliiii1iii], i1Il1lIililIli1i1I1) if l1Il11I1Ii111I11III[i1Il1lIililIli1i1I1] == 1 then i1il1i1iIIi1i1iiIiI = i1il1i1iIIi1i1iiIiI == 1 and 0 or 1 end IIllll1I1ll1i1Il11i = IIllll1I1ll1i1Il11i + 2 ^ i11iiIlill1I1ilIi1I * i1il1i1iIIi1i1iiIiI i11iiIlill1I1ilIi1I = i11iiIlill1I1ilIi1I + 1 end IlIil1ilii1I1lillII = IlIil1ilii1I1lillII .. string.char(IIllll1I1ll1i1Il11i) end local I1Iili1I1lI1ii1l1ii, iiilili1IIii1i11lIi, lIlIlIilIIii1lIll1Ill, lIllIilIilII1i1Ii1l1l = IlIil1ilii1I1lillII:byte(1, 4) return lIllIilIilII1i1Ii1l1l * 16777216 + lIlIlIilIIii1lIll1Ill * 65536 + iiilili1IIii1i11lIi * 256 + I1Iili1I1lI1ii1l1ii end local function iIli1iIIli11IIIII1I(lilIl1iI1IiIiiIlIi1) local iIi1lIlillIiiil1I1i = iIIiIiI1I111I111lil() I1Ii1llIiI1liIil1ll = I1Ii1llIiI1liIil1ll + iIi1lIlillIiiil1I1i local l1Il11I1Ii111I11III = {} for illll1IIIlliiii1iii = 1, 8 do l1Il11I1Ii111I11III[illll1IIIlliiii1iii] = lIll1i1I1II1lIIi11Iil(lilIl1iI1IiIiiIlIi1, illll1IIIlliiii1iii) end local IlIil1ilii1I1lillII = "" for illll1IIIlliiii1iii = 1, iIi1lIlillIiiil1I1i do local IIllll1I1ll1i1Il11i, i11iiIlill1I1ilIi1I = 0, 0 for i1Il1lIililIli1i1I1 = 1, 8 do local i1il1i1iIIi1i1iiIiI = lIll1i1I1II1lIIi11Iil(liIIliIIllll1iliIii:byte(I1Ii1llIiI1liIil1ll - iIi1lIlillIiiil1I1i + illll1IIIlliiii1iii - 1), i1Il1lIililIli1i1I1) if l1Il11I1Ii111I11III[i1Il1lIililIli1i1I1] == 1 then i1il1i1iIIi1i1iiIiI = i1il1i1iIIi1i1iiIiI == 1 and 0 or 1 end IIllll1I1ll1i1Il11i = IIllll1I1ll1i1Il11i + 2 ^ i11iiIlill1I1ilIi1I * i1il1i1iIIi1i1iiIiI i11iiIlill1I1ilIi1I = i11iiIlill1I1ilIi1I + 1 end IlIil1ilii1I1lillII = IlIil1ilii1I1lillII .. string.char(IIllll1I1ll1i1Il11i) end return IlIil1ilii1I1lillII end assert(IIiII11lI1iliiIllIl(4) == "\027LPH", "This VM can only run Luraph scripts.") local lIiil1lIili11llIIIl = llIiii11lIii1iliiII() local i1I11IliliIIIil1I1i = llIiii11lIii1iliiII() local function I11l1IlIlI1lli1I11i() local IlilliI1i1I1II1111i = { IiilI11l1Illi1l1Ii11 = {}, lIllii1Iill11liIIIll = {}, lIll11111I1I1lIIilIiiI = {}, lIl111liiI1I1lll1i1II1 = {} } local lIl1llIl1iIiiii1l111I = #{ 1996, 20348, 18031, 121734, 50997, 105570, 72638, 62550, 132957, 50073, 33332, 127394, 37810, 41536, 70676, 81080, 7562, 40225, 25737, 110612, 60087, 26693, 116376, 130741 } - 19 - 28 + 24 - 8 + 0 - 24 + 43 - 3 - 44 - 32 + 42 - 2 - 31 + 59 llIiii11lIii1iliiII() iIIiIiI1I111I111lil() iIIiIiI1I111I111lil() iIIiIiI1I111I111lil() IlilliI1i1I1II1111i.lliIii1l1Iili11iIIII = llIiii11lIii1iliiII() iIIiIiI1I111I111lil() local lIilI1l1l1ll1iIi11I = iIIiIiI1I111I111lil() for illll1IIIlliiii1iii = lIl1llIl1iIiiii1l111I, lIilI1l1l1ll1iIi11I do IlilliI1i1I1II1111i.lIll11111I1I1lIIilIiiI[illll1IIIlliiii1iii - lIl1llIl1iIiiii1l111I] = I11l1IlIlI1lli1I11i() end iIIiIiI1I111I111lil() local lIilI1l1l1ll1iIi11I = iIIiIiI1I111I111lil() - (#{ 13994, 84876, 122271, 11719, 58639, 103920, 84556, 68513, 46235, 50265, 13190, 23255, 80541, 127123, 62382, 1885, 45466, 35846, 56061, 117991, 54137, 11660, 54201 } + 33 + 42 - 28 - 7 - 30 - 14 - 49 + 28 + 34 - 29 + 0 - 4 + 18 - 3 + 133691) for illll1IIIlliiii1iii = lIl1llIl1iIiiii1l111I, lIilI1l1l1ll1iIi11I do local lIl1liIiIIi1III1II1li = {} lIl1liIiIIi1III1II1li.lii11IiiIIiI111i1I1l = llIiii11lIii1iliiII() if lIl1liIiIIi1III1II1li.lii11IiiIIiI111i1I1l == 128 then lIl1liIiIIi1III1II1li.lil1IIlI1iIiii1I1i1I = llIiii11lIii1iliiII() ~= 236 end if lIl1liIiIIi1III1II1li.lii11IiiIIiI111i1I1l == 218 then lIl1liIiIIi1III1II1li.lil1IIlI1iIiii1I1i1I = Ii11IlIiII1I1IlliiI() end if lIl1liIiIIi1III1II1li.lii11IiiIIiI111i1I1l == 235 then lIl1liIiIIi1III1II1li.lil1IIlI1iIiii1I1i1I = iIli1iIIli11IIIII1I(lIiil1lIili11llIIIl) end IlilliI1i1I1II1111i.IiilI11l1Illi1l1Ii11[illll1IIIlliiii1iii - lIl1llIl1iIiiii1l111I] = lIl1liIiIIi1III1II1li end llIiii11lIii1iliiII() local lIilI1l1l1ll1iIi11I = iIIiIiI1I111I111lil() for illll1IIIlliiii1iii = lIl1llIl1iIiiii1l111I, lIilI1l1l1ll1iIi11I do IlilliI1i1I1II1111i.lIllii1Iill11liIIIll[illll1IIIlliiii1iii] = iIIiIiI1I111I111lil() end llIiii11lIii1iliiII() llIiii11lIii1iliiII() local lIilI1l1l1ll1iIi11I = iIIiIiI1I111I111lil() - (#{ 20491, 131834, 51091, 86598, 99920, 47342, 33479, 98952, 4754, 19594, 123245, 115428, 23280, 26268, 9147, 117613, 122433, 86688, 96333, 58762 } - 11 + 36 + 22 - 38 - 48 + 4 + 11 - 16 + 25 - 23 - 8 - 36 - 3 + 24 + 133805) for illll1IIIlliiii1iii = lIl1llIl1iIiiii1l111I, lIilI1l1l1ll1iIi11I do local i111iI1ii1II1liIiII = {} local lIl1ili1liii1I1IIl1li = lIllIIIi1I1Illl1Il1(i1I11IliliIIIil1I1i) i111iI1ii1II1liIiII.Iii11iI11l1i1iIi1iII = lIll1i1I1II1lIIi11Iil(lIl1ili1liii1I1IIl1li, -#{ 64574, 36724, 54295, 33848, 81536, 131665, 8889, 126332, 109519, 130228, 888, 32306, 2066, 53909, 78522, 41063, 106607, 38088, 1914, 35485, 102268 } + 49 + 41 + 25 - 1 - 26 - 30 - 14 + 28 - 2 - 4 - 26, -#{ 79424, 52884, 104946, 54685, 101116, 57423, 15765, 133554, 43172, 126173, 752, 91507, 31440, 86062, 120431, 112120, 27004, 133640, 129756, 45149, 75240, 33520, 8720 } + 41 - 35 - 10 + 18 + 2 + 26 + 8 - 27 + 44 + 28 - 19 + 20 - 47) i111iI1ii1II1liIiII.llI11i11IiiI1liIl11i = lIll1i1I1II1lIIi11Iil(lIl1ili1liii1I1IIl1li, -#{ 46872, 54552, 94751, 120635, 131296, 8818, 109501, 15355, 50267, 13665, 90931, 33450, 31889, 3036, 50746, 53621, 113776, 74351, 100054, 583, 36870 } - 3 - 29 + 25 + 15 - 26 + 49 - 24 + 4 + 20 + 49 - 40 + 23 - 1 - 40, #{ 111049, 27134, 10683, 77579, 42459, 46803, 708, 52738, 22018, 38137, 79075, 44026, 104131, 20358, 76488, 112924, 119081, 102715, 101841, 72922, 50347, 85869 } - 23 + 8 - 46 - 21 - 35 + 39 - 14 + 10 - 19 + 23 + 18 - 26 + 32 + 50) - 131071 i111iI1ii1II1liIiII.I1liiiIll1llliI11IiI = lIll1i1I1II1lIIi11Iil(lIl1ili1liii1I1IIl1li, -#{ 80706, 46670, 24326, 54886, 12662, 67996, 39111, 73901, 123938, 121198, 37122, 39855, 127255, 115910, 25445, 118731, 45911, 106153, 23340, 36108 } - 39 - 21 - 10 + 17 + 46 + 13 + 43 + 35 - 13 - 36 + 30 + 7 + 37 + 22 - 18 - 83, -#{ 58579, 54300, 72427, 9457, 94049, 33699, 76374, 22525, 23042, 80623, 112454, 48442, 68920, 76367, 93346, 102931, 54547, 50792, 5576, 46784 } - 2 - 43 + 30 - 16 + 34 + 4 - 16 + 49 - 26 - 2 + 45 - 21 + 47 - 10 - 35) i111iI1ii1II1liIiII.iii111iIlllliI11Ilil = lIll1i1I1II1lIIi11Iil(lIl1ili1liii1I1IIl1li, #{ 72549, 61837, 92616, 44306, 117325, 100553, 102851, 98783, 36385, 34787, 66927, 130315, 74926, 110802, 121674, 20647 } - 48 + 1 + 18 + 38 + 22 - 7 + 32 + 37 - 7 - 25 - 10 - 40, -#{ 42344, 3249, 49202, 59136, 87978, 3097, 13651, 61265, 18008, 43976, 124300, 38710, 44842, 67643, 55346, 55451, 31206, 111983, 99383, 71306, 57285, 73427, 99051, 33622 } + 6 + 32 - 48 + 23 + 14 + 10 + 31 + 41 - 31 + 31 + 4 - 11 - 46) i111iI1ii1II1liIiII.lll1il1i1Il11IiIi1I1 = lIll1i1I1II1lIIi11Iil(lIl1ili1liii1I1IIl1li, #{ 19995, 52807, 8089, 123098, 113746 } - 18 + 21 + 36 - 44 + 20 - 23 + 34 - 14 + 33 - 16 + 39 - 49 - 23, #{ 27362, 4438, 81532, 70958, 56304, 105724, 38877, 25746, 28124, 121124, 103552, 68331, 50877, 71198, 36379, 96298, 31145, 85562, 33004, 104460 } + 12 + 14 - 34 - 11 - 43 - 14 - 26 - 10 - 11 + 45 + 67) i111iI1ii1II1liIiII.iilliIi1iII1lIl1lIIi = lIll1i1I1II1lIIi11Iil(lIl1ili1liii1I1IIl1li, #{ 100789, 100126, 58424, 36493, 118357, 43806, 59772, 58420, 81220, 50084, 64617, 34596, 60601, 59359, 31584, 72983, 100778, 62548, 91286, 117725, 71018, 69005, 71925, 80757 } - 42 + 44 + 6 - 47 - 38 - 46 + 47 - 14 - 16 - 25 - 28 - 41 + 177, #{ 109142, 68504, 57723, 36762, 78648, 61721, 103627, 9907, 39563, 10260, 89863, 76076, 2482, 68029, 31484, 77580, 109096, 26680, 118698, 86815, 30114, 80423, 57150 } - 22 + 29 + 20 - 18 - 13 + 4 - 36 + 11 - 46 - 38 + 31 + 22 - 25 + 6 + 15 + 55) IlilliI1i1I1II1111i.lIl111liiI1I1lll1i1II1[illll1IIIlliiii1iii] = i111iI1ii1II1liIiII end llIiii11lIii1iliiII() llIiii11lIii1iliiII() iIIiIiI1I111I111lil() IlilliI1i1I1II1111i.i11l1ii1l111Ii111iii = llIiii11lIii1iliiII() return IlilliI1i1I1II1111i end local function ll1i11liIIIIIIIIlli(IlilliI1i1I1II1111i, il1I11liIiil111iIl1) local Il111I11l11iiilll1l, IIIiIl1i1l1l1iI1IiI, ii11i1lIiIiIii1Illi, iiilIlIiIIIllll11ii = "lil1IIlI1iIiii1I1i1I", "lliIii1l1Iili11iIIII", "iii111iIlllliI11Ilil", "lll1il1i1Il11IiIi1I1" local IIlI1iIlil1li1li1Ii, lI1il1illl111IiIll1 = 27, 23 local lii1iliIlIIliii11il = IlilliI1i1I1II1111i.lIl111liiI1I1lll1i1II1 local lIilIIIli1I11liIiii = setmetatable({}, { __index = function(ll1IiliI1ilIIilliiI, IilIII11l1IlIii1I1l) local IlIil1ilii1I1lillII = IlilliI1i1I1II1111i.IiilI11l1Illi1l1Ii11[IilIII11l1IlIii1I1l] if type(IlIil1ilii1I1lillII[Il111I11l11iiilll1l]) == "string" then return { [Il111I11l11iiilll1l] = IlIil1ilii1I1lillII[Il111I11l11iiilll1l]:sub(2) } end return IlIil1ilii1I1lillII end }) local Ii11Il1i1illl11iIll = IlilliI1i1I1II1111i.lIll11111I1I1lIIilIiiI local lIllIIiillii11Il11i1i = IlilliI1i1I1II1111i.i11l1ii1l111Ii111iii local iIl1lIlIll111IIIiIi = IlilliI1i1I1II1111i.lIllii1Iill11liIIIll local function iiIlIIiIillliIIi1ii(...) local IIi111lIl1ilIil1IiI, iIi1I1iIl1IiI11lI11, lIIllIIi1II1IliIilI, il1IlIililIIliiIl1l, lIlIllllIiiiIi1ll1I1l, liili1IlIi11lilliil, iiiiiiIll1illi1lIi1 local lIIi111li1lIllIIllI = {} local I1lIi1liIili1lll1l1 = {} iIi1I1iIl1IiI11lI11 = -1 lIIllIIi1II1IliIilI = setmetatable(lIIi111li1lIllIIllI, { __index = I1lIi1liIili1lll1l1, __newindex = function(ll1IiliI1ilIIilliiI, IilIII11l1IlIii1I1l, lIllIiIIiIII11IiiI11I) if IilIII11l1IlIii1I1l > iIi1I1iIl1IiI11lI11 and lIllIiIIiIII11IiiI11I then iIi1I1iIl1IiI11lI11 = IilIII11l1IlIii1I1l end I1lIi1liIili1lll1l1[IilIII11l1IlIii1I1l] = lIllIiIIiIII11IiiI11I end }) IIi111lIl1ilIil1IiI = 1 il1IlIililIIliiIl1l = getfenv()[string.char(#{ 47995, 87069, 126791, 98586, 60810, 118893, 40736, 13300, 60262, 42650, 58431, 55675, 88578, 111257, 107148, 29979, 110165, 771, 104797, 18471, 2286 } - 37 - 28 - 44 - 34 + 2 - 2 - 43 + 11 - 49 + 5 - 35 - 18 - 45 - 26 - 19 + 459, #{ 82230, 87407, 91177, 17610, 125352, 81526, 103346, 81640, 25111, 63895, 82670, 64639, 46883, 11396, 39615, 110293, 80049, 41175, 58333, 121435, 90922, 132495, 27609 } + 10 - 46 - 42 - 35 + 46 + 35 - 38 + 32 + 26 - 28 - 43 + 8 - 49 + 27 + 24 + 160, #{ 5025, 29752, 69605, 82472, 90572, 15962, 89655, 9806, 92421, 88801, 53135, 69365, 83327, 124282, 59835, 51821, 128628, 8490, 121661, 45936, 68472 } + 6 + 1 + 16 - 25 + 13 - 29 - 11 + 18 + 20 - 26 - 9 + 106, #{ 102640, 18782, 117406, 50895, 103149, 53352, 64964, 74869, 123482, 19726, 58065, 113695, 49681, 128580, 52292, 114861, 46240, 45797, 27173, 119499, 26422, 98942, 53061 } + 4 - 13 - 15 + 11 + 44 - 30 - 14 - 33 + 6 - 1 - 48 + 42 - 41 - 31 + 36 + 162, -#{ 58335, 25341, 115619, 23012, 42328, 130049, 2098, 110776, 58495, 50552, 41573, 121658, 3428, 98521, 102597, 85250, 29887, 24884, 48808, 111455, 129193 } - 9 + 8 + 42 + 13 + 24 + 36 + 24 - 36 + 48 + 17 - 4 + 18 - 27 - 16 - 1, #{ 11393, 48070, 110991, 18189, 115887, 31978, 75610, 126232, 84452, 77945, 63051, 47111, 63590, 84731, 56400, 34128, 40273, 57566, 77519, 95990, 50183, 19238 } - 40 - 29 - 43 + 21 - 17 - 6 - 42 + 31 - 32 - 40 + 276, -#{ 41863, 5473, 123654, 94897, 59258, 28386, 66988, 54656, 97578 } + 13 + 9 - 0 - 28 + 29 + 24 + 10 + 34 + 29 + 13 + 9 - 30):reverse()]() iiiiiiIll1illi1lIi1 = {} local iilIIli1Ii11iIII1ii = { ... } lIlIllllIiiiIi1ll1I1l = {} liili1IlIi11lilliil = select("#", ...) - 1 for illll1IIIlliiii1iii = 0, liili1IlIi11lilliil do lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] = iilIIli1Ii11iIII1ii[illll1IIIlliiii1iii + 1] lIlIllllIiiiIi1ll1I1l[illll1IIIlliiii1iii] = iilIIli1Ii11iIII1ii[illll1IIIlliiii1iii + 1] end local iiI1ilIillI1l1iIIII = { [#{ 58612, 25842, 5114, 65025, 96265, 91239, 55974, 55352, 26568, 68425, 4589, 19697, 125839, 96112, 11409, 69094, 5798, 117016, 79410, 6685, 71925 } - 7 + 32 - 39 - 47 + 37 - 39 + 30 - 35 + 31 + 12 - 34 - 28 + 82] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i local iIii1llli1iiilIllii, lIl1i1IliiiIi1lIiliI1, i1iIIIIIIi1Iilii1ll if lIlIll1IIi1l1llIIl11I == 1 then return true end if lIlIll1IIi1l1llIIl11I == 0 then iIii1llli1iiilIllii = iIi1I1iIl1IiI11lI11 else iIii1llli1iiilIllii = iI1llil1lliIlIIIli1 + lIlIll1IIi1l1llIIl11I - 2 end i1iIIIIIIi1Iilii1ll = {} lIl1i1IliiiIi1lIiliI1 = 0 for illll1IIIlliiii1iii = iI1llil1lliIlIIIli1, iIii1llli1iiilIllii do lIl1i1IliiiIi1lIiliI1 = lIl1i1IliiiIi1lIiliI1 + 1 i1iIIIIIIi1Iilii1ll[lIl1i1IliiiIi1lIiliI1] = lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] and lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] or lIliliiiIIli11iiliIlI end return true, i1iIIIIIIi1Iilii1ll end, [#{ 102554, 114027, 132690, 23101, 80051, 43600, 95650, 118665, 39933, 52011, 83734, 64936, 105310, 90322, 38763, 86447, 13426, 20355, 100788, 74976, 114880, 53287, 27486, 16533 } - 27 + 17 + 47 - 20 - 33 - 18 + 9 + 20 + 11 + 15 - 40 - 27 + 33] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i local I111il11l1lll1l1li1 = lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 2] local I1Ii1llIiI1liIil1ll = lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] + I111il11l1lll1l1li1 lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = I1Ii1llIiI1liIil1ll if I111il11l1lll1l1li1 > 0 then if I1Ii1llIiI1liIil1ll <= tonumber(lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 1]) then IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + i1IlIIi1iI1iiIIIii1 lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 3] = I1Ii1llIiI1liIil1ll end elseif I1Ii1llIiI1liIil1ll >= tonumber(lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 1]) then IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + i1IlIIi1iI1iiIIIii1 lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 3] = I1Ii1llIiI1liIil1ll end end, [#{ 74646, 61044, 13053, 62733, 54825, 3567, 18083, 131768, 98325, 68851, 63812, 108630, 124132, 5053 } + 48 - 47 + 8 - 10 - 46 + 30 - 20 + 20 + 7 + 37 + 3 - 37] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = #lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end, [#{ 55038, 98156, 73263, 9918, 98658, 6873, 64818, 14894, 32800, 29143, 104849, 34139, 106179, 106154, 78839, 82888, 119870, 52241, 71582, 66142 } - 30 + 24 + 1 + 7 - 31 - 38 + 40 + 30 + 2 - 7 - 20 - 38 + 59] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = {} end, [#{ 20944, 125532, 90168, 75274, 77158, 10706, 118904, 26089, 6484, 81622, 130959, 13777, 14789, 29631, 103740, 44303, 58960, 91101, 103824, 54711, 114444, 22693, 102348 } - 5 - 13 - 17 + 14 - 27 - 30 + 10 + 33 - 47 - 33 + 116] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = lIilIIIli1I11liIiii[lIllII1iliI11lIl1l1ll][Il111I11l11iiilll1l] end, [#{ 52554, 113350, 88348, 109922, 10153, 122957, 131257, 102915, 78908, 118205, 83683, 93829, 23498, 18885, 35153, 5424, 30884, 98330, 128037, 38597, 14171 } + 28 - 24 - 6 + 24 - 18 + 47 + 39 + 5 - 9 - 24 + 32 - 41 + 9 - 27 + 5 - 36 - 12 + 2] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = -lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end, [#{ 120497, 91847, 102340, 3213, 50333, 78663, 117351, 95757, 23254, 67696, 55999, 133354, 32243, 121099, 16801, 34108, 60949, 72344, 74915, 29536, 90532, 119650 } - 43 - 20 + 8 - 24 + 13 + 35 + 35 + 36 - 25 - 19 - 46 - 46 + 29 + 62] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i local lIllIi1llli1l1li1i111 = function(...) local lIlIlIilIIii1lIll1Ill = select("#", ...) local ll1IiliI1ilIIilliiI = { ... } return lIlIlIilIIii1lIll1Ill, ll1IiliI1ilIIilliiI end local iilIIli1Ii11iIII1ii, iI1l1IiiilIlliIliiI, iIii1llli1iiilIllii, lIl1i1IliiiIi1lIiliI1 iilIIli1Ii11iIII1ii = {} if lIlIll1IIi1l1llIIl11I ~= 1 then if lIlIll1IIi1l1llIIl11I ~= 0 then iIii1llli1iiilIllii = iI1llil1lliIlIIIli1 + lIlIll1IIi1l1llIIl11I - 1 else iIii1llli1iiilIllii = iIi1I1iIl1IiI11lI11 end lIl1i1IliiiIi1lIiliI1 = 0 for illll1IIIlliiii1iii = iI1llil1lliIlIIIli1 + 1, iIii1llli1iiilIllii do lIl1i1IliiiIi1lIiliI1 = lIl1i1IliiiIi1lIiliI1 + 1 iilIIli1Ii11iIII1ii[lIl1i1IliiiIi1lIiliI1] = lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] end iIii1llli1iiilIllii, iI1l1IiiilIlliIliiI = lIllIi1llli1l1li1i111(lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1](unpack(iilIIli1Ii11iIII1ii, 1, iIii1llli1iiilIllii - iI1llil1lliIlIIIli1))) else iIii1llli1iiilIllii, iI1l1IiiilIlliIliiI = lIllIi1llli1l1li1i111(lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1]()) end iIi1I1iIl1IiI11lI11 = iI1llil1lliIlIIIli1 - 1 if IiIIll1il11i1ll1IlI ~= 1 then if IiIIll1il11i1ll1IlI ~= 0 then iIii1llli1iiilIllii = iI1llil1lliIlIIIli1 + IiIIll1il11i1ll1IlI - 2 else iIii1llli1iiilIllii = iIii1llli1iiilIllii + iI1llil1lliIlIIIli1 end lIl1i1IliiiIi1lIiliI1 = 0 for illll1IIIlliiii1iii = iI1llil1lliIlIIIli1, iIii1llli1iiilIllii do lIl1i1IliiiIi1lIiliI1 = lIl1i1IliiiIi1lIiliI1 + 1 lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] = iI1l1IiiilIlliIliiI[lIl1i1IliiiIi1lIiliI1] end end end, [-#{ 99284, 126300, 72502, 120635, 23740, 107319, 27285, 50417, 6562, 128842, 5184, 45277, 2671, 108977, 104322, 86134, 120788, 59320, 47334, 106264, 31359 } - 9 + 15 + 35 + 38 + 32 - 22 + 18 - 39 + 36 - 33 - 37] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] - lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 2] IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + i1IlIIi1iI1iiIIIii1 end, [-#{ 11552, 19555, 8043, 101865, 44635, 120270, 18104, 94172, 530, 23839, 73087, 21203, 16098, 49787, 2755, 80161, 88671, 60126, 19753, 71363, 128571, 116155, 80617, 29172 } + 11 + 27 + 3 + 4 - 13 - 9 + 2 + 12 + 12 - 6 + 47 - 25 + 13 + 2 + 27 + 20 - 82] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIlIll1IIi1l1llIIl11I = lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] if IiIIll1il11i1ll1IlI > 255 then IiIIll1il11i1ll1IlI = lIilIIIli1I11liIiii[IiIIll1il11i1ll1IlI - 256][Il111I11l11iiilll1l] else IiIIll1il11i1ll1IlI = lIIllIIi1II1IliIilI[IiIIll1il11i1ll1IlI] end lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 1] = lIlIll1IIi1l1llIIl11I lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = lIlIll1IIi1l1llIIl11I[IiIIll1il11i1ll1IlI] end, [#{ 119079, 66792, 20248, 65396, 18526, 34793, 105944, 52382, 43711, 94572, 18698, 101876, 48893, 96631, 69136, 112496, 89513, 32549, 7015, 120123, 1205 } - 25 - 30 + 28 + 31 - 12 - 30 + 10 + 38 - 7 - 19 + 23 + 30 + 17 - 42 - 42 - 11 + 34] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = not lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end, [#{ 101474, 119989, 15550, 87494, 110314, 78327, 20669, 81325, 30818, 121140, 76230, 115803, 89090, 70182, 97922, 82966, 82072, 103980, 92818, 45715, 34314, 42971, 106484 } - 48 + 14 + 10 - 43 - 30 + 31 + 2 + 20 - 41 - 27 - 6 - 30 + 28 + 117] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i for illll1IIIlliiii1iii = iI1llil1lliIlIIIli1, lIlIll1IIi1l1llIIl11I do lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] = nil end end, [#{ 110820, 62590, 116045, 64963, 11440, 96820, 79177, 69264, 80403, 64117, 29195, 130501, 23201, 29755, 117301, 5376, 79887, 48499, 92448, 52240, 106063 } - 2 - 32 + 16 - 35 - 27 - 42 + 10 + 26 - 18 - 7 - 26 - 15 + 134] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + i1IlIIi1iI1iiIIIii1 end, [#{ 125426, 9657, 6425, 62222, 96351, 111162, 49746, 52500, 76565, 105364, 42304, 91125, 81451, 38786, 22675, 72314, 37303, 13062, 86995, 122299, 26341, 35437, 23343 } + 22 + 5 - 40 - 43 + 22 - 30 - 47 - 17 + 45 + 34 + 36 - 32 + 8 + 41] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i iI1llil1lliIlIIIli1 = iI1llil1lliIlIIIli1 ~= 0 if lIlIll1IIi1l1llIIl11I > 255 then lIlIll1IIi1l1llIIl11I = lIilIIIli1I11liIiii[lIlIll1IIi1l1llIIl11I - 256][Il111I11l11iiilll1l] else lIlIll1IIi1l1llIIl11I = lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end if IiIIll1il11i1ll1IlI > 255 then IiIIll1il11i1ll1IlI = lIilIIIli1I11liIiii[IiIIll1il11i1ll1IlI - 256][Il111I11l11iiilll1l] else IiIIll1il11i1ll1IlI = lIIllIIi1II1IliIilI[IiIIll1il11i1ll1IlI] end if lIlIll1IIi1l1llIIl11I < IiIIll1il11i1ll1IlI ~= iI1llil1lliIlIIIli1 then IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + 1 end end, [#{ 27669, 44861, 78663, 71812, 85753, 23867, 111117, 63819, 5257, 67848, 60327, 95780, 40049, 44062, 27570, 6468, 106687, 98264, 117175, 5273, 66348, 1371, 116880 } - 37 + 4 + 4 - 41 + 41 - 5 + 8 + 23 + 2 + 46 - 45 - 37 + 24] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i local lilIl1iI1IiIiiIlIi1 = lIilIIIli1I11liIiii[lIllII1iliI11lIl1l1ll][Il111I11l11iiilll1l] lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = il1IlIililIIliiIl1l[lilIl1iI1IiIiiIlIi1] end, [#{ 20009, 61955, 13554, 28869, 76977, 38311, 45195, 53060, 73074, 65853, 60555, 129889, 31053, 52045, 128494, 104056, 50148, 47074, 100028, 32695, 80894, 32230 } - 10 - 47 - 9 + 33 - 19 + 29 + 9 + 6 + 13 - 43 + 41] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = il1I11liIiil111iIl1[lIlIll1IIi1l1llIIl11I] end, [#{ 48402, 3140, 27318, 107974, 117150, 131744, 121317, 79724, 61815, 123098, 52531, 67872, 12290, 98018, 57431, 28666, 82919, 45822, 119760, 11335, 74126, 7335, 114815 } - 41 - 33 - 40 - 16 - 3 - 38 + 1 + 6 + 20 - 2 + 25 + 11 - 8 + 104] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i local lilIl1iI1IiIiiIlIi1 = lIilIIIli1I11liIiii[lIllII1iliI11lIl1l1ll][Il111I11l11iiilll1l] il1IlIililIIliiIl1l[lilIl1iI1IiIiiIlIi1] = lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] end, [#{ 114787, 9496, 79819, 2696, 58276, 79730, 41040, 133187, 88871 } - 5 + 46 - 48 - 1 - 29 + 25 - 7 + 14 + 24 + 5 - 21 - 42 - 18 + 18 + 1 + 30] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i for illll1IIIlliiii1iii = iI1llil1lliIlIIIli1, iI1llil1lliIlIIIli1 + (lIlIll1IIi1l1llIIl11I > 0 and lIlIll1IIi1l1llIIl11I - 1 or liili1IlIi11lilliil) do if illll1IIIlliiii1iii - iI1llil1lliIlIIIli1 <= liili1IlIi11lilliil then lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] = lIlIllllIiiiIi1ll1I1l[lIllIIiillii11Il11i1i + (illll1IIIlliiii1iii - iI1llil1lliIlIIIli1)] else lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] = nil end end end, [-#{ 41751, 108413, 74081, 5385, 111380, 116912, 126395, 100145, 105188, 23908, 17575, 43190, 3253, 64803, 18132, 106022, 105099 } + 36 - 41 - 35 + 20 - 25 + 42 + 48 + 2 + 22 - 29] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i il1I11liIiil111iIl1[lIlIll1IIi1l1llIIl11I] = lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] end, [#{ 83620, 10503, 86883, 5759, 52395, 69834, 18467, 32973, 21128, 63555, 83526, 111018, 40327, 6588, 97592, 111591, 121589, 32459, 124336, 120397, 85097, 28629, 35973 } + 39 - 47 - 46 - 29 - 13 - 40 + 35 - 25 - 5 - 19 + 41 + 88] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end, [-#{ 56455, 12529, 74987, 31802, 48709, 50611, 39652, 131040, 118190, 35825, 49366, 25297, 117309, 35022, 10221, 68258, 4291, 72372, 40245, 82119, 7196, 75749, 87937, 78297 } - 9 + 48 + 48 + 39 - 7 + 7 - 46 - 0 - 4 - 2 + 30 + 48 - 24 - 43 - 43] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i for illll1IIIlliiii1iii = iI1llil1lliIlIIIli1, iIi1I1iIl1IiI11lI11 do for IilIII11l1IlIii1I1l, lIliii1IiI11IllII1IlI in next, iiiiiiIll1illi1lIi1, nil do for lilIl1iI1IiIiiIlIi1, il1IlII1ii1111Iiii1 in next, lIliii1IiI11IllII1IlI, nil do local ii1I1ilIl1l1Iii1lli = il1IlII1ii1111Iiii1.segment[il1IlII1ii1111Iiii1.offset] if lIIllIIi1II1IliIilI[illll1IIIlliiii1iii] == ii1I1ilIl1l1Iii1lli then lIliii1IiI11IllII1IlI[lilIl1iI1IiIiiIlIi1] = { segment = {ii1I1ilIl1l1Iii1lli}, offset = 1 } break end end end end end, [-#{ 8597, 123036, 5852, 24703, 60197, 11496, 108944, 132121, 128490, 53638, 12753, 23545, 111795, 90145, 81730, 60770, 44463, 21305, 25420, 66621, 54381 } + 49 + 10 - 22 + 3 - 21 + 6 + 18 - 43 - 28 + 42 + 38 + 25 - 1 - 44 - 6] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i if IiIIll1il11i1ll1IlI > 255 then IiIIll1il11i1ll1IlI = lIilIIIli1I11liIiii[IiIIll1il11i1ll1IlI - 256][Il111I11l11iiilll1l] else IiIIll1il11i1ll1IlI = lIIllIIi1II1IliIilI[IiIIll1il11i1ll1IlI] end lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I][IiIIll1il11i1ll1IlI] end, [-#{ 8921, 67103, 34599, 66941, 74151, 92415, 54568, 123615, 92023, 23090, 106644, 13372, 108902, 133124, 96028, 2442, 31440, 114509, 69443, 58308, 90082 } + 48 + 47 - 41 + 40 + 43 + 12 + 35 - 33 + 14 + 32 - 13 - 157] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i iI1llil1lliIlIIIli1 = iI1llil1lliIlIIIli1 ~= 0 if lIlIll1IIi1l1llIIl11I > 255 then lIlIll1IIi1l1llIIl11I = lIilIIIli1I11liIiii[lIlIll1IIi1l1llIIl11I - 256][Il111I11l11iiilll1l] else lIlIll1IIi1l1llIIl11I = lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end if IiIIll1il11i1ll1IlI > 255 then IiIIll1il11i1ll1IlI = lIilIIIli1I11liIiii[IiIIll1il11i1ll1IlI - 256][Il111I11l11iiilll1l] else IiIIll1il11i1ll1IlI = lIIllIIi1II1IliIilI[IiIIll1il11i1ll1IlI] end if lIlIll1IIi1l1llIIl11I == IiIIll1il11i1ll1IlI ~= iI1llil1lliIlIIIli1 then IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + 1 end end, [#{ 101949, 109518, 90806, 87526, 52423, 113877, 133059, 105242, 92664, 55014, 64087, 80518, 77810, 48093, 86325, 34265, 11409, 133390, 99966, 112742, 38779 } - 19 - 43 - 40 + 15 - 6 + 36 + 30 - 25 - 20 - 48 - 0 + 37 + 70] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = lIlIll1IIi1l1llIIl11I ~= 0 if IiIIll1il11i1ll1IlI ~= 0 then IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + 1 end end, [-#{ 3427, 21452, 77395, 64163, 66540, 15102, 104289, 127743, 30998, 110490, 28029, 110859, 88909, 75054, 1974, 20827, 88849, 41877, 25465, 25752, 47101, 72083, 30323, 68482 } + 24 + 48 - 9 - 32 + 31 - 23 - 16 - 35 + 25 + 19 + 16 + 41 - 39] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i if lIlIll1IIi1l1llIIl11I > 255 then lIlIll1IIi1l1llIIl11I = lIilIIIli1I11liIiii[lIlIll1IIi1l1llIIl11I - 256][Il111I11l11iiilll1l] else lIlIll1IIi1l1llIIl11I = lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end if IiIIll1il11i1ll1IlI > 255 then IiIIll1il11i1ll1IlI = lIilIIIli1I11liIiii[IiIIll1il11i1ll1IlI - 256][Il111I11l11iiilll1l] else IiIIll1il11i1ll1IlI = lIIllIIi1II1IliIilI[IiIIll1il11i1ll1IlI] end lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = lIlIll1IIi1l1llIIl11I + IiIIll1il11i1ll1IlI end, [#{ 84614, 39699, 1546, 73161, 29948, 41766, 74179, 42050, 66777, 92481, 130704, 72563, 119679, 107274, 56804, 39066, 123722, 36435, 85230, 72856, 96828, 124167 } - 20 + 20 - 33 - 14 - 0 - 32 + 10 + 24 - 11 - 18 - 41 - 38 + 36 - 40 + 157] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i local IiIiiIi11lllilii1lI = Ii11Il1i1illl11iIll[lIllII1iliI11lIl1l1ll] local iI1llIIliiii1I1ii1I = {} local il1ll11llI111lIIIIl = setmetatable({}, { __index = function(ll1IiliI1ilIIilliiI, IilIII11l1IlIii1I1l) local il1IlII1ii1111Iiii1 = iI1llIIliiii1I1ii1I[IilIII11l1IlIii1I1l] return il1IlII1ii1111Iiii1.segment[il1IlII1ii1111Iiii1.offset] end, __newindex = function(ll1IiliI1ilIIilliiI, IilIII11l1IlIii1I1l, lIllIiIIiIII11IiiI11I) local il1IlII1ii1111Iiii1 = iI1llIIliiii1I1ii1I[IilIII11l1IlIii1I1l] il1IlII1ii1111Iiii1.segment[il1IlII1ii1111Iiii1.offset] = lIllIiIIiIII11IiiI11I end }) for illll1IIIlliiii1iii = 1, IiIiiIi11lllilii1lI[IIIiIl1i1l1l1iI1IiI] do local lilIIiiIiiliI11Iiii = lii1iliIlIIliii11il[IIi111lIl1ilIil1IiI] if lilIIiiIiiliI11Iiii[ii11i1lIiIiIii1Illi] == IIlI1iIlil1li1li1Ii then iI1llIIliiii1I1ii1I[illll1IIIlliiii1iii - 1] = { segment = lIIllIIi1II1IliIilI, offset = lilIIiiIiiliI11Iiii[iiilIlIiIIIllll11ii] } elseif lilIIiiIiiliI11Iiii[ii11i1lIiIiIii1Illi] == lI1il1illl111IiIll1 then iI1llIIliiii1I1ii1I[illll1IIIlliiii1iii - 1] = { segment = il1I11liIiil111iIl1, offset = lilIIiiIiiliI11Iiii[iiilIlIiIIIllll11ii] } end IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + 1 end iiiiiiIll1illi1lIi1[#iiiiiiIll1illi1lIi1 + 1] = iI1llIIliiii1I1ii1I local ili1lIlIilIIlIi1II1 = ll1i11liIIIIIIIIlli(IiIiiIi11lllilii1lI, il1ll11llI111lIIIIl) lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] = ili1lIlIilIIlIi1II1 end, [#{ 76420, 54161, 16078, 55589, 64512, 56383, 65699, 72668 } + 23 + 6 - 6 - 1 + 11 + 20 - 1 - 19 + 15 - 37 - 19] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i local IlIliII11Illi11iiIi = iI1llil1lliIlIIIli1 + 2 local iilIliillliI111111I = { lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1](lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 1], lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 2]) } for illll1IIIlliiii1iii = 1, IiIIll1il11i1ll1IlI do lIIllIIi1II1IliIilI[IlIliII11Illi11iiIi + illll1IIIlliiii1iii] = iilIliillliI111111I[illll1IIIlliiii1iii] end if lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 3] ~= nil then lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 2] = lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1 + 3] else IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + 1 end end, [#{ 92387, 39058, 133154, 104782, 62602, 41410, 108453, 122441, 94202, 10765, 42845, 45031, 12009, 94977, 80223, 94838, 74216, 10924, 26860, 120731, 124283 } + 13 - 34 - 23 + 29 - 15 - 13 - 17 - 9 + 36 + 16 - 13 - 11 + 32] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i if lIlIll1IIi1l1llIIl11I > 255 then lIlIll1IIi1l1llIIl11I = lIilIIIli1I11liIiii[lIlIll1IIi1l1llIIl11I - 256][Il111I11l11iiilll1l] else lIlIll1IIi1l1llIIl11I = lIIllIIi1II1IliIilI[lIlIll1IIi1l1llIIl11I] end if IiIIll1il11i1ll1IlI > 255 then IiIIll1il11i1ll1IlI = lIilIIIli1I11liIiii[IiIIll1il11i1ll1IlI - 256][Il111I11l11iiilll1l] else IiIIll1il11i1ll1IlI = lIIllIIi1II1IliIilI[IiIIll1il11i1ll1IlI] end lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1][lIlIll1IIi1l1llIIl11I] = IiIIll1il11i1ll1IlI end, [-#{ 99731, 112965, 41827, 87319, 85186, 102886, 121213, 123849, 93301, 70775, 107515, 117650, 128094, 45660, 60369, 19761, 16202, 51113, 13219, 41633, 39215 } + 49 + 2 - 41 + 15 + 34 + 35 + 39 - 28 + 42 + 11 - 8 + 45 - 170] = function(i1Iiill1iil1Il1liIl) local iI1llil1lliIlIIIli1 = i1Iiill1iil1Il1liIl.Iii11iI11l1i1iIi1iII local lIlIll1IIi1l1llIIl11I = i1Iiill1iil1Il1liIl.lll1il1i1Il11IiIi1I1 local IiIIll1il11i1ll1IlI = i1Iiill1iil1Il1liIl.I1liiiIll1llliI11IiI local lIllII1iliI11lIl1l1ll = i1Iiill1iil1Il1liIl.iilliIi1iII1lIl1lIIi local i1IlIIi1iI1iiIIIii1 = i1Iiill1iil1Il1liIl.llI11i11IiiI1liIl11i if not not lIIllIIi1II1IliIilI[iI1llil1lliIlIIIli1] == (IiIIll1il11i1ll1IlI == 0) then IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + 1 end end } local iI11II1IIIIIiIlI1Il = { [-#{ 86277, 49319, 16914, 99492, 92368, 24447, 103236, 73809, 38448, 85774, 21413, 6775, 68087, 124694, 74599, 20995, 51824, 63081, 58396, 60229, 36503, 124416 } - 2 - 10 + 28 - 23 - 32 - 1 + 42 - 41 + 30 + 8 + 1 + 28 - 30 + 41 + 6 - 22] = iiI1ilIillI1l1iIIII[-#{ 127601, 15130, 129765, 27496, 109652, 19750, 53483, 12424, 114724, 50365, 39409, 65658, 115500, 125814, 52824, 92544, 38848, 97887, 79693, 80742, 7412, 33608 } - 18 + 27 + 41 + 15 + 48 - 47 + 12 + 20 + 9 + 8 + 10 - 89], [-#{ 76306, 118469, 18590, 3035 } + 22 + 28 - 20 - 22 + 20 + 44 - 34 - 29 - 19 + 14 + 0 + 2] = iiI1ilIillI1l1iIIII[-#{ 100940, 123152, 67602, 11846, 55523, 4532, 41143, 119719, 7385, 90844, 129907, 27525, 105742, 92117, 42416, 128029, 49720, 95282, 99604, 9882, 45548, 78087 } + 14 + 38 + 46 + 21 - 38 + 40 + 43 - 32 - 23 - 44 - 30 + 3 + 43 + 41 - 100], [#{ 83397, 56069, 6055, 79567, 61204, 68885, 18614, 89625, 108676, 119762, 19498, 116051, 38860, 64264, 99950, 125441, 38615, 65846, 69072, 99643, 99253, 11434, 53452 } - 29 - 22 + 26 - 23 - 37 + 2 - 0 - 47 + 22 - 35 + 43 - 33 - 18 + 131] = iiI1ilIillI1l1iIIII[-#{ 101047, 88807, 54688, 85189, 96265, 21156, 58459, 74849, 68047, 21960, 34525, 26073, 109284, 3207, 42998, 44523, 132881, 78710, 24967, 78078, 35060, 21412 } + 35 - 41 + 2 + 49 - 3 - 42 - 30 + 18 + 43 - 18 + 48 - 46 + 43 + 23 - 47], [-#{ 29521, 112808, 117913, 36493, 1116, 15252, 35397, 122979, 42557, 85534, 64836, 84272, 29205, 85133, 38363, 132940, 40925, 26398, 71766, 78733, 49612, 130498, 105110, 7731 } - 15 + 2 + 16 + 37 - 34 + 13 + 25 + 43 - 41 + 20 - 46 + 10 + 48 + 21 - 71] = iiI1ilIillI1l1iIIII[-#{ 79863, 78721, 116469, 57061, 111700, 30901, 89938, 64811, 118431, 49992, 102428, 124260 } - 5 + 37 + 2 - 3 - 4 + 39 - 19 - 7 - 12 + 30 - 22], [#{ 65384, 91831, 53207, 128244, 13362, 17108, 105158, 74391, 61265, 26744, 69718, 14017, 52509, 43143, 47730, 80313, 64124, 52214, 47228, 53833, 109634, 53389 } - 0 + 3 + 34 + 35 - 29 + 42 - 37 - 24 + 3 - 29 + 18 + 8 - 36 - 49 + 44] = iiI1ilIillI1l1iIIII[#{ 90816, 63508, 43954, 88281, 36172, 78012, 66705, 71272, 21528, 54877, 31191, 50375, 50839, 5477, 133568, 12643, 5464, 93720, 132242, 87272 } + 36 - 39 - 45 + 36 + 1 + 3 - 35 - 42 + 41 - 32 - 27 - 25 - 34 - 24 + 11 + 181], [#{ 70829, 79520, 16185, 64898, 42831, 95590, 63475, 30411, 38556, 89593, 109421, 31705, 90898, 14749, 101825, 72479, 113463, 42416, 55878, 50349, 6890, 61175 } - 11 - 3 - 4 - 1 - 44 - 43 + 2 - 31 + 3 + 5 + 37 + 5 + 69] = iiI1ilIillI1l1iIIII[-#{ 122264, 65713, 75283, 30392, 129392, 122192, 63019, 56858, 32671, 132202, 131650, 17904, 101813, 37753, 9591, 56675, 73896, 116638, 117027, 23007, 16426 } - 15 + 43 + 36 + 48 + 29 - 3 - 48 + 36 - 7 + 47 - 136], [-#{ 30082, 107917, 129702, 104775, 120021, 24022, 46125, 90100, 97443, 114321, 42674, 35754, 34384, 73638, 93276, 124923, 39695, 64959, 10572, 55102, 93194 } + 34 + 8 - 15 - 19 + 31 + 39 + 25 + 8 + 19 + 3 + 17 + 48 - 170] = iiI1ilIillI1l1iIIII[-#{ 95353, 8828, 118154, 64465, 103017, 104149, 32058, 59702, 94328, 93930, 125171, 22744, 90147, 42682, 49159, 78359, 35152, 46059, 89393, 86054 } - 3 + 16 - 30 - 47 + 0 + 36 - 31 + 47 + 21 + 34 - 6], [#{ 77543, 76655, 12356, 17062, 1477, 122664, 108597, 126520, 23372, 126231, 44025, 92991, 14537, 11972, 93653, 82655, 133069, 44073, 19789 } + 37 + 25 - 36 + 27 - 13 + 28 + 47 - 30 + 3 + 24 - 27 - 11 - 38 - 16 - 31] = iiI1ilIillI1l1iIIII[#{ 54136, 119131, 71760, 13193, 112625, 23648, 129297, 34493, 63346, 78243, 27910, 21456, 119973, 42381, 32665, 6419, 24088, 122263, 65509, 74249, 107858 } - 6 - 14 - 1 - 41 - 46 - 44 + 40 - 18 + 28 - 16 - 32 + 134], [-#{ 35045, 51952, 123103, 18268, 72987, 94466, 113411, 116752, 3439, 97339, 4191, 74216, 89574, 79441, 118335, 322, 113539, 63554, 87769, 61743 } + 42 - 3 - 26 + 37 - 22 - 6 + 0 - 23 + 42 + 4 - 1 - 15] = iiI1ilIillI1l1iIIII[-#{ 45680, 13336, 117421, 64267, 53787, 110598, 61792, 58675, 72485, 24423, 94346, 86391, 57666, 42819, 71856, 85970, 66626, 44186, 34834, 51540, 48049, 8138, 65043, 24364 } + 16 - 1 + 19 - 9 - 16 + 19 - 30 - 19 + 23 + 45 - 47 + 23 + 38 - 15], [-#{ 4955, 107415, 41044, 121597, 80598, 126873, 94123, 30240, 37739, 78050, 121566, 102738, 103225, 124867, 132743, 77784, 90355, 13968, 85762, 133601, 60041, 56827 } + 46 - 10 - 14 + 21 + 7 + 41 - 22 + 46 - 27 + 34 + 15 - 17 + 20 + 23 + 23 - 154] = iiI1ilIillI1l1iIIII[-#{ 133055, 87687, 108793, 22810, 115679, 22568, 85402, 23571, 96985, 47414, 53148, 80285, 27927, 47464, 37773, 109218, 47195, 9236, 125569, 46174, 100240, 48516 } + 45 - 46 + 34 - 28 + 24 - 23 - 35 + 27 + 0 - 41 - 49 + 44 + 28 + 21 + 45 - 17], [#{ 1216, 23468, 23831, 75043, 39627, 14436, 63128, 73191, 1504, 57718, 11204, 64584, 654, 48056, 47235, 67877, 41971, 116700, 31737, 104164, 25462 } + 21 - 42 + 16 - 4 - 31 - 13 + 41 + 30 - 41 - 1 - 17 - 41 - 39 - 34 - 9 + 154] = iiI1ilIillI1l1iIIII[#{ 93585, 74861, 124651, 100105, 101450, 112628, 95105, 125095, 43902, 35762, 99450, 101757, 66528, 91314, 79295, 47195, 75665, 35249, 1107, 25110, 131426, 79550 } + 39 - 29 - 39 + 46 - 38 - 6 + 35 - 3 - 4 - 33 + 18 - 37 + 30], [-#{ 110708, 126437, 112669, 55073, 101633, 43672, 116064, 50969, 113357, 49154, 40530, 25415, 39134, 121725, 4292, 59817, 116718, 54604, 51475, 126499, 17769, 79023, 111520, 36828 } + 47 + 35 - 40 - 27 + 36 + 32 + 49 - 41 - 21 - 2 - 28 + 42 - 25 - 21] = iiI1ilIillI1l1iIIII[-#{ 116781, 101989, 94838, 30078, 81111, 39156, 78216, 51647, 102650, 45300, 108165, 90806, 114123, 51993, 99244, 14933, 15015, 100420, 126310, 126673, 74269, 86839 } + 7 + 6 + 39 + 30 + 40 - 14 + 14 - 5 - 45 + 45 + 20 - 7 - 25 - 60], [#{ 49128, 27178, 42971, 103251, 32091, 96065, 41510, 132176, 112975, 99853, 7630, 109, 89801, 57256, 93084, 54357, 127982, 46954, 23192, 112137, 11557, 91547 } - 48 - 34 + 27 + 16 + 49 + 30 + 20 - 41 + 23 - 20 - 36 + 5] = iiI1ilIillI1l1iIIII[-#{ 3316, 41067, 112137, 46722, 41836, 39028, 35933, 78263, 3104, 132939, 19727, 8236, 1356, 55144, 12673, 60292, 115564, 91440, 2780, 11341, 94573, 104920 } - 33 - 2 + 46 - 18 - 23 + 33 + 8 + 31 - 32 + 25 + 46 - 34 - 13 + 28 + 49 + 30 - 34 - 64], [-#{ 47105, 128668, 32963, 13492, 116899, 10499, 45737, 116023, 76676, 18551, 2333, 52972, 72560, 49669, 120163, 26628, 123772, 21220, 70235, 44891, 32238, 66744, 69417 } - 31 - 19 - 31 - 10 + 21 + 36 - 42 + 39 + 25 + 43 + 27 + 40 + 29 - 22 - 68] = iiI1ilIillI1l1iIIII[-#{ 81359, 5066, 7459, 52142, 5056, 73948, 610, 2227, 34959, 51446, 63996, 37781, 81798, 99059, 12074, 63991, 79221, 54769, 115788, 16717, 42435, 6195, 8805 } + 8 + 36 - 0 - 9 + 23 + 8 - 37 - 22 - 47 + 44 - 29 + 11 + 48 + 19 - 20], [-#{ 45313, 34001, 74122, 16414, 92009, 109897, 23907, 106332, 93301, 90377, 84298, 18938, 51443, 61171, 25280, 21863, 33025, 78979, 118036, 113812, 8247, 61826, 65873 } + 49 + 45 + 18 - 33 + 44 - 17 - 25 - 47 + 25 - 23 + 18 - 7 - 9] = iiI1ilIillI1l1iIIII[-#{ 84403, 17286, 116647, 127119, 79577, 100825, 34820, 47153, 46119, 24045, 105935, 51578, 17886, 4579, 31786, 57414, 95026 } - 35 + 49 - 40 + 9 + 47 - 26 + 45 - 21 + 1 - 5 - 18 - 32 - 1 + 48], [-#{ 110528, 103210, 103738, 122837, 39082, 42177, 121608, 110565, 125161, 82201, 65075, 122593, 13111, 128160, 93215, 119466, 73337, 57326, 116140, 82037, 78877 } + 2 + 12 - 0 + 22 - 9 + 36 - 40 - 30 - 5 + 34 - 3 + 47 - 29] = iiI1ilIillI1l1iIIII[-#{ 132181, 70130, 90151, 130215, 22131, 14218, 61643, 77105, 46518, 51356, 23131 } + 7 + 33 - 3 - 0 - 29 + 11 + 24 + 6 + 6 + 49 - 30 - 47], [#{ 27244, 56747, 68054, 79727, 102550, 1200, 13230, 55931, 47108, 41181, 69536, 15067, 72227, 57632, 43607, 109923, 128524, 91522, 24201, 14724, 25202, 40850 } - 33 + 9 + 23 + 38 + 16 - 38 - 5 - 28 + 22 - 33 + 10 - 2 - 33 + 35 + 14] = iiI1ilIillI1l1iIIII[#{ 21902, 19018, 124040, 111171, 59247, 41040, 46119, 84438, 44064, 125795, 65180, 8097, 11755, 50242, 30129, 48923, 96573, 109906, 70843, 4424, 125615, 93686 } - 48 + 34 + 37 + 5 + 23 - 21 - 17 - 24 - 25 + 40 - 26 + 20], [-#{ 80917, 1484, 92301, 9062, 58125, 75327, 14807, 52582, 666, 26586, 126161, 20031, 18538, 62001, 129408, 40696, 85642, 30778, 32380, 116745, 74671, 19189, 33694 } + 43 + 32 + 21 + 32 + 14 + 17 + 24 + 11 - 25 - 46 - 82] = iiI1ilIillI1l1iIIII[-#{ 109563, 79858, 126292, 106883, 132687, 37765, 29614, 91175, 72410, 129495, 30485, 116317, 4273, 77413, 4226, 56870 } - 31 + 22 + 9 - 4 - 11 + 18 + 19 - 49 + 16 - 17 - 21 + 5 + 12 + 13 + 43], [#{ 53541, 25043, 11848, 55209, 104749, 84449, 16791, 127735, 33096, 48878, 42070, 130756, 43619, 102255, 26329, 111144, 5844, 7083, 62124, 133444, 15258, 122200, 13061 } - 23 + 7 - 36 + 41 + 34 - 15 + 39 - 30 - 16 - 38 - 35 + 68] = iiI1ilIillI1l1iIIII[#{ 116273, 110018, 112936, 1733, 49638, 100160, 8689, 10808, 72413, 43660, 101073, 77290, 130311, 108195, 2987, 69087, 17110, 47914, 37226, 126754, 110021, 115866, 106181 } + 20 + 27 - 13 - 23 - 26 - 33 + 5 - 20 + 1 - 33 + 12 + 33 + 20 - 41 + 67], [-#{ 86403, 17244, 41272, 107477, 99884, 89856, 20759, 110470, 94517, 133425, 65719, 126661, 1842, 102600, 50990, 99466, 101464, 23112, 1104, 24051 } + 42 + 45 - 16 - 22 - 17 + 37 - 0 + 34 - 3 + 43 - 11 - 39 - 53] = iiI1ilIillI1l1iIIII[#{ 15180, 71826, 85354, 61631, 25718, 79998, 130173, 64670, 86453, 60288, 16110, 108764, 15111, 95456, 17466, 65768, 84153, 46493, 12977, 36801 } - 42 - 21 - 10 - 44 - 31 - 1 + 40 - 25 + 22 + 34 + 44 - 5 - 29 + 61], [-#{ 106837, 63363, 96156, 93091, 71535, 106685, 2890, 66397, 91334, 45511, 50117, 66542, 41578, 130870, 131094, 29666, 110417, 99103, 1018, 116106, 27929, 127619, 34394, 79941 } + 19 - 21 + 14 + 16 + 3 - 22 + 38 + 35 + 14 + 47 + 42 - 140] = iiI1ilIillI1l1iIIII[-#{ 81213, 10627, 87908, 79733, 117941, 54858, 106567, 44682, 90142, 49694, 48765, 82693, 2626, 114151, 127518, 35663, 56714, 96221, 8828, 93087, 106269 } - 38 + 30 - 42 - 29 - 35 + 30 + 36 + 0 + 40 + 16 - 2 + 6 + 18 + 6], [#{ 17536, 49872, 45727, 29514, 46938, 4000, 100113, 126339, 56022, 54168, 87649, 70979, 106970, 118606, 13731, 40903, 40184, 114735, 52398, 20404, 21359, 36150, 16172 } - 16 - 4 - 30 + 0 + 26 + 29 - 24 + 10 + 10 - 28 - 36 + 8 + 44 + 10] = iiI1ilIillI1l1iIIII[-#{ 37511, 116892, 44078, 129644, 35061, 89745, 80798, 114182, 127011, 90138, 93895, 128560, 97085, 77496, 42120, 84484, 95936, 125409, 31891, 52959, 2465, 68740, 114769 } + 36 + 21 + 16 + 47 - 22 - 6 + 35 - 23 - 44 + 41 + 48 + 30 - 150], [-#{ 101877, 43641, 85647, 123579, 11966, 75665, 100242, 66758, 85842, 50760, 26318, 44552, 102270, 49827, 89558, 19365, 47626, 56301, 57940, 17631, 78254, 17844, 51614 } + 11 - 14 - 22 + 10 + 36 - 36 + 40 + 37 + 26 - 6 + 44 - 21 - 59] = iiI1ilIillI1l1iIIII[#{ 13305, 72960, 124691, 80643, 110312, 4475, 63072, 93466, 21108, 129541, 83297, 131708, 44257, 121291, 72820, 85151, 86697, 66401, 97521, 69490, 96084, 54591, 30675 } - 39 - 5 - 2 - 15 + 27 + 47 - 44 - 47 - 29 + 47 - 31 - 22 - 46 + 37 + 117], [-#{ 127929, 67020, 55860, 4048, 70361, 19722, 104212, 2324, 86225, 104325, 77908, 11792, 49787, 81240, 110061, 15417, 44615, 42942, 45944, 38414, 116191, 85370, 26536, 28410 } - 6 + 34 + 38 + 23 - 36 + 41 + 2 - 2 - 32 - 8 + 39 + 44 - 89] = iiI1ilIillI1l1iIIII[-#{ 24361, 26785, 26553, 101736, 69102, 91188, 524, 40106, 5380, 27877, 43658, 71074, 133457, 126585, 71748, 36154, 38563, 23901, 96521, 87545, 30169 } + 43 - 8 + 47 + 4 + 13 + 2 - 5 + 13 + 19 - 12 - 70], [#{ 107664, 129379, 75901, 22274, 7361, 27333, 31388, 44591, 49549, 82738, 108033, 42075, 63457, 95715, 75137, 83024, 62694, 30088, 113426, 33194, 10629 } + 49 - 34 - 42 + 4 - 43 + 9 - 2 - 34 - 6 + 23 + 32 + 47 + 1] = iiI1ilIillI1l1iIIII[#{ 83203, 10867, 7921, 11708, 40058, 73297, 132122, 121497, 62907, 124995, 33841, 54485, 51771, 62704, 9441, 31930, 66532, 37487, 14949, 104796, 38382 } - 40 + 13 - 42 + 41 + 44 - 43 + 8 - 40 + 32 + 11 - 36 + 31 + 10 + 4 - 20 + 33], [-#{ 96682, 45791, 48365, 97180, 32393, 69405, 120410, 25764, 99714, 131601, 108877, 88202, 14964, 20659, 106463, 69577, 113022, 126922, 53915, 96096 } + 24 + 25 - 1 - 8 - 20 - 19 - 12 + 32 + 39 - 16 - 34 - 38 - 1 + 42 + 41 + 10 - 18] = iiI1ilIillI1l1iIIII[-#{ 77849, 20703, 63761, 31660, 82945, 67195, 96310, 8511, 60779, 43117, 127340, 96720, 94600, 102215, 68109, 130309, 44598, 36984, 55956, 15700, 12349, 53171, 88327, 75204 } + 10 + 38 + 15 + 16 + 14 - 30 - 39 + 45 + 45 + 31 - 44 - 66], [-#{ 114881, 123438, 21604, 47359, 82701, 78549, 66341, 43605, 104270, 104954, 58759, 60572, 64279, 1743, 10218, 75021, 50273, 44042, 79877, 123540 } + 47 + 31 - 28 + 27 + 9 + 13 - 48 - 1 + 28 - 28 - 49 + 33 - 4 + 42 + 26 - 51] = iiI1ilIillI1l1iIIII[-#{ 44989, 130390, 82653, 67757, 48349, 110155, 117093, 91160, 38695, 131298, 132520, 44442, 31534, 23869, 14980, 106998, 44895, 7326, 45735, 98543, 121525 } - 8 + 36 - 37 + 25 + 23 + 18 + 20 + 24 + 18 + 38 + 45 - 12 + 23 + 46 - 13 - 222], [#{ 98760, 62900, 16724, 55333, 82805, 11848, 101648, 54840, 115077, 12142, 87282, 94690, 108123, 122875, 116125, 82644, 15862, 83823, 9490, 111431, 29499 } + 30 + 19 - 12 - 33 + 31 - 29 - 42 - 22 - 25 + 40 + 5 - 39 + 84] = iiI1ilIillI1l1iIIII[-#{ 117233, 82857, 105378, 17352, 106706, 37637, 30231, 66541, 21753, 120612, 59536, 82091, 35619, 34462, 16404, 99346, 105159, 53170, 4981, 50956, 111230, 30907, 693, 55379 } - 34 + 2 + 20 - 42 + 49 - 4 + 7 + 35 + 39 - 45 - 1] } local function lIl1i1IliiiIi1lIiliI1() local i1Iiill1iil1Il1liIl, i1lllII11Ili11Il1Il, IlIil1ilii1I1lillII while true do local lIllIilIilII1i1Ii1l1l = il1IlIililIIliiIl1l.T1GYBx10IpGFLzRKuOoE i1Iiill1iil1Il1liIl = lii1iliIlIIliii11il[IIi111lIl1ilIil1IiI] IIi111lIl1ilIil1IiI = IIi111lIl1ilIil1IiI + 1 i1lllII11Ili11Il1Il, IlIil1ilii1I1lillII = iI11II1IIIIIiIlI1Il[i1Iiill1iil1Il1liIl.iii111iIlllliI11Ilil + 1](i1Iiill1iil1Il1liIl) if i1lllII11Ili11Il1Il then return IlIil1ilii1I1lillII end end end local iliiI1i11ililII1l1l, IlIil1ilii1I1lillII = pcall(lIl1i1IliiiIi1lIiliI1) if iliiI1i11ililII1l1l then if IlIil1ilii1I1lillII then for illll1IIIlliiii1iii, lIllIiIIiIII11IiiI11I in pairs(IlIil1ilii1I1lillII) do if lIllIiIIiIII11IiiI11I == lIliliiiIIli11iiliIlI then IlIil1ilii1I1lillII[illll1IIIlliiii1iii] = nil end end return unpack(IlIil1ilii1I1lillII) end else error("Luraph Script:" .. iIl1lIlIll111IIIiIi[IIi111lIl1ilIil1IiI - 1] .. ": " .. (IlIil1ilii1I1lillII:match("^.+:%s*(.+)") or IlIil1ilii1I1lillII), 0) end end return iiIlIIiIillliIIi1ii end local lIl1l1iiiII1IIl1l1Ii1 = I11l1IlIlI1lli1I11i() return ll1i11liIIIIIIIIlli(lIl1l1iiiII1IIl1l1Ii1)() end i11IllII1i1liliI1Il("\027LPH\233\144\228\187t\179k\173\131\160\\0\142\198q\000}\142\001k\001\000\000\0008\248\154\238\005\201\160\241J6Ug\n\000y\179Iw\006\000\000\000\190&vl(\r\156\216U\129\004\129Y\001Ip\250M\000\000\000\000c\214[UM\n\002\000\218\000\000\000\000\000\000\000\000\235\005\000\000\000\233\135\140\145\157\235\t\000\000\000\233\143\156\135\138\157\128\134\135\218\000\000\000\000\000\000\240?K\015\000\000\000\006\000\000\000\a\000\000\000\a\000\000\000\a\000\000\000\a\000\000\000\b\000\000\000\b\000\000\000\b\000\000\000\b\000\000\000\b\000\000\000\t\000\000\000\a\000\000\000\n\000\000\000\f\000\000\000\r\000\000\000\159/\147\n\002\000\144\144\148\156\145\144\152\164\144\144\156\252\148\144\128\208\149\144\146\248\144\144\140\204\150\144\176\252\146\148\140\136\151\148\146\196\144\144\146\248\145\150\150\128\144\148\152\148go\145\248\146\144\148\172\145\144\144\172\153\251\186\252}\f\001\238\188\150\183\025\220\234\000I\196\022\192H\003\253\0260\004\000\000\000\000\202\143\154nW\n\002\000\218\000\000\000\000\000\000\240?\235\t\000\000\000\233\143\156\135\138\157\128\134\135\235\005\000\000\000\233\135\140\145\157\235\006\000\000\000\233\141\140\139\156\142\235\f\000\000\000\233\142\140\157\156\153\159\136\133\156\140\154\235\006\000\000\000\233\157\136\139\133\140\218\000\000\000\000\000\192R@\235\003\000\000\000\233\188\160\219\235\006\000\000\000\233\171\128\135\141\154\218\000\000\000\000\000\000\b@\235\005\000\000\000\233\167\136\132\140\235\006\000\000\000\233\185\156\135\138\129\235\t\000\000\000\233\170\136\133\133\139\136\138\130\160R\000\000\000\015\000\000\000\015\000\000\000\015\000\000\000\015\000\000\000\015\000\000\000\016\000\000\000\016\000\000\000\017\000\000\000\017\000\000\000\017\000\000\000\017\000\000\000\017\000\000\000\018\000\000\000\018\000\000\000\018\000\000\000\018\000\000\000\018\000\000\000\018\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\019\000\000\000\020\000\000\000\020\000\000\000\020\000\000\000\020\000\000\000\021\000\000\000\021\000\000\000\021\000\000\000\021\000\000\000\021\000\000\000\022\000\000\000\022\000\000\000\022\000\000\000\022\000\000\000\022\000\000\000\022\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\023\000\000\000\024\000\000\000\024\000\000\000\024\000\000\000\024\000\000\000\025\000\000\000\025\000\000\000\025\000\000\000\025\000\000\000\025\000\000\000\025\000\000\000\025\000\000\000\025\000\000\000\025\000\000\000\026\000\000\000\026\000\000\000\026\000\000\000\026\000\000\000\024\000\000\000\022\000\000\000\029\000\000\000\020\000\000\000\031\000\000\000\018\000\000\000!\000\000\000\015\000\000\000%\000\000\000\024\183\214\n\002\000\144\144\144\156\144\144\148\204\145\144\148\180\144\144\152\156\218\144\146\220\144\144\128\204\148\150\128\140\145\144\132\204\148\144\136\252\146\148\132\136\149\146\146\196\211\144\146\248\146\144\132\164\147\144\136\164\150\152\138\140\148\144\140\252\146\150\136\136\171\144\146\248\145\144\184\204\153\144\188\252\146\148\184\136\154\154\146\196\166\144\146\248\146\144\184\204\153\144\188\252\146\148\184\136\150\133\144\240\161\144\146\248\146\144\184\164\153\144\188\252\156\144\160\208\187\144\146\248\145\144\172\204\158\144\208\252\146\148\172\136\159\146\146\196\182\144\146\248\146\144\172\164\147\144\208\164\128\152\210\140\158\144\212\252\146\150\208\136\142\144\146\248\145\144\192\204\131\144\196\252\146\148\192\136\132\154\146\196\137\144\146\248\131\158\194\140\132\128\150\196\134\144\146\248\145\144\192\204\131\130\198\140\146\148\192\136\132\154\146\196\129\144\146\248\144\144\192\156\154\144\196\156\144\144\200\156\156\144\194\220\131\130\242\140\136\190\240\140\144\144\240\168\152\144\146\248\131\130\242\140\136\190\240\140\136\134\242\140\136\136\146\196\147\144\146\248\131\130\242\140\136\190\240\140\136\138\242\140\146\144\240\172ao\193\244\144\148\172\148No\145\248\144\148\184\148Ao\145\248\144\148\132\148Qo\145\248#o\145\244\145\144\144\172|\128\151\254U\026\000\208\166\219\144\021\249\161\030$\031q\151 \001$\"\002R\002\000\000\000\180cK\149\022\169\247\252a\232i(?\002\205\241T\017\000\000\000\000\197\210\182rL\n\002\000\235\b\000\000\000\233\155\140\152\156\128\155\140\235\r\000\000\000\233\170\128\155\138\133\140\168\138\157\128\134\135\235\006\000\000\000\233\186\153\140\138\154\130\a\000\000\000.\000\000\000.\000\000\000.\000\000\000.\000\000\000.\000\000\000.\000\000\000.\000\000\000\137\144\139\n\002\000\144\144\144\164\145\144\148\204\146\148\144\136\144\146\146\140\144\148\146\140\144\144\144\188\145\144\144\172M\196\176\bx_\000\202:\225\239)\211\1584A\142\031\209U\000\b\149\251\b\000\000\000\000o0\217\tO\n\002\000\235\017\000\000\000\233\134\153\140\135\173\134\134\155\170\136\133\133\139\136\138\130\235\005\000\000\000\233\185\136\155\157\235\t\000\000\000\233\186\130\140\133\140\157\134\135\235\015\000\000\000\233\187\134\134\143\173\134\134\155\170\133\134\154\140\141\235\014\000\000\000\233\157\155\136\128\135\170\136\133\133\139\136\138\130\235\006\000\000\000\233\191\136\156\133\157\193\016\000\000\0004\000\000\0004\000\000\0004\000\000\0004\000\000\0004\000\000\0004\000\000\0004\000\000\0005\000\000\0005\000\000\0005\000\000\0005\000\000\0005\000\000\0005\000\000\0005\000\000\0005\000\000\0006\000\000\000\231\217\148\n\002\000\144\144\148\164\144\146\152\216\144\148\158\140\147\150\158\140\145\151\152\152\145\144\156\212\147\146\148\136\148\144\148\164\144\146\152\216\144\148\158\140\147\154\158\140\147\146\158\140\145\151\152\152\145\144\156\212\147\146\148\136\145\144\144\172\130L\188\1642&\001\149L\1488\\\n\002\000\235\v\000\000\000\233\157\155\136\128\135\172\159\140\135\157\235\005\000\000\000\233\142\136\132\140\235\v\000\000\000\233\174\140\157\186\140\155\159\128\138\140\235\018\000\000\000\233\187\140\153\133\128\138\136\157\140\141\186\157\134\155\136\142\140\235\a\000\000\000\233\164\134\141\156\133\140\235\003\000\000\000\233\188\160\235\020\000\000\000\233\156\135\133\134\138\130\182\132\134\141\156\133\140\154\138\155\128\153\157\235\006\000\000\000\233\153\138\136\133\133\218\000\000\000\000\000\000\240?\235\005\000\000\000\233\167\136\132\140\235\r\000\000\000\233\171\155\140\136\138\129\201\191\136\156\133\157\235\014\000\000\000\233\157\155\136\128\135\170\136\133\133\139\136\138\130\219\235\t\000\000\000\233\170\136\133\133\139\136\138\130\235\n\000\000\000\233\166\153\140\135\201\173\134\134\155\235\017\000\000\000\233\134\153\140\135\173\134\134\155\170\136\133\133\139\136\138\130\235\t\000\000\000\233\157\134\154\157\155\128\135\142\235\005\000\000\000\233\185\136\155\157\235\015\000\000\000\233\187\134\134\143\173\134\134\155\170\133\134\154\140\141\0146\000\000\000+\000\000\000+\000\000\000+\000\000\000+\000\000\000,\000\000\000,\000\000\000,\000\000\000,\000\000\000,\000\000\000,\000\000\000-\000\000\000-\000\000\000-\000\000\000-\000\000\000-\000\000\000-\000\000\000.\000\000\000.\000\000\000.\000\000\000.\000\000\000.\000\000\000/\000\000\000/\000\000\000/\000\000\000/\000\000\000/\000\000\0000\000\000\0000\000\000\0001\000\000\0001\000\000\0001\000\000\0001\000\000\0001\000\000\0001\000\000\0002\000\000\0002\000\000\0006\000\000\0006\000\000\0006\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0007\000\000\0008\000\000\0008\000\000\000/\000\000\000;\000\000\000\144\028\186\n\002\000\144\144\144\164\144\144\144\168\144\144\146\248\145\144\144\172\145\144\144\164\144\148\146\160\147\144\152\156\147\148\144\136\144\152\146\140\144\154\146\140\150\144\148\164\144\144\148\168\146\144\146\248\150\144\148\164\144\144\152\252\146\146\148\136\151\144\148\164\144\144\152\176\144\144\144\204\144\144\144\252\146\146\148\136\152\144\148\156\144\144\152\204\146\144\152\180\152\144\156\156\137\144\150\220\144\144\132\204\149\152\132\140\149\130\138\140\150\132\146\196\151\144\146\248\155\144\136\164\150\136\146\196\148\144\146\248\149\138\138\140\155\144\136\132\145\144\136\176\144\144\136\132\156\144\146\248\149\130\138\140\150\140\146\196\153\144\146\248\159\144\136\164\150\136\146\196\150\144\146\248\128\144\136\164\149\178\142\140\146\148\136\136\150\180\146\196\145\144\146\248\149\138\138\140\159\144\136\132to\149\244\145\144\144\172a\031\169\024\232\014\000\169\178\148hS\nb!P\016\201Zm\000\180Y\nu\000\000\000\000\v\208\148\rL\n\002\000\235\014\000\000\000\233\153\156\135\138\129\170\136\133\133\139\136\138\130\235\005\000\000\000\233\167\136\132\140\235\006\000\000\000\233\185\156\135\138\129\142\006\000\000\000>\000\000\000>\000\000\000>\000\000\000>\000\000\000>\000\000\000?\000\000\000o]\138\n\002\000\144\144\144\164\144\146\148\216\145\149\150\152\145\144\152\212\147\146\144\136\145\144\144\172|\154\190\236w\025\000\240c3\250\127 \020\215u\157s16\002\017\225\154!\000\000\000\000Baq_L\n\002\000\235\b\000\000\000\233\155\140\152\156\128\155\140\235\r\000\000\000\233\170\128\155\138\133\140\168\138\157\128\134\135\235\006\000\000\000\233\186\153\140\138\1543\a\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000\242\140\139\n\002\000\144\144\144\164\145\144\148\204\146\148\144\136\144\146\146\140\144\148\146\140\144\144\144\188\145\144\144\172\r@\241l\166o\000\240\211\185\177\028hh\205>\192\022\a\r\001\176\237/q\000\000\000\000\217\207`~P\n\002\000\218\000\000\000\000\000\000\240?\235\005\000\000\000\233\167\136\132\140\235\004\000\000\000\233\154\156\139\218\000\000\000\000\000\000\020@\235\006\000\000\000\233\174\155\136\139\201\235\t\000\000\000\233\170\136\133\133\139\136\138\130\235\005\000\000\000\233\158\136\128\157\181\021\000\000\000F\000\000\000F\000\000\000F\000\000\000F\000\000\000F\000\000\000G\000\000\000G\000\000\000H\000\000\000H\000\000\000H\000\000\000H\000\000\000H\000\000\000H\000\000\000H\000\000\000I\000\000\000I\000\000\000I\000\000\000J\000\000\000J\000\000\000F\000\000\000M\000\000\000zt\153\n\002\000\144\144\144\156\144\144\148\204\145\144\148\180\144\144\152\156\157\144\146\220\144\144\128\204\148\150\128\140\148\146\134\140\149\148\134\160\144\144\140\156\147\144\176\156\148\148\132\136\149\152\146\196\148\144\146\248\148\154\134\160\145\144\140\212\147\146\132\136\150\144\132\164\145\146\132\136`o\145\244\145\144\144\172\154{EA\001b\000F\243D\024a\n\002\000\235\a\000\000\000\233\142\140\157\155\140\142\235\006\000\000\000\233\141\140\139\156\142\235\f\000\000\000\233\142\140\157\155\140\142\128\154\157\155\144\235\b\000\000\000\233\142\140\157\154\140\135\159\235\f\000\000\000\233\142\140\157\156\153\159\136\133\156\140\154\235\a\000\000\000\233\154\138\155\140\135\159\235\a\000\000\000\233\153\133\136\144\140\155\235\014\000\000\000\233\185\133\136\144\140\155\186\138\155\128\153\157\154\235\f\000\000\000\233\165\134\138\136\133\186\138\155\128\153\157\235\005\000\000\000\233\157\144\153\140\235\014\000\000\000\233\153\156\135\138\129\170\136\133\133\139\136\138\130\235\004\000\000\000\233\189\170\171\235\v\000\000\000\233\153\156\135\138\129\172\159\140\135\157\235\005\000\000\000\233\142\136\132\140\235\v\000\000\000\233\174\140\157\186\140\155\159\128\138\140\235\018\000\000\000\233\187\140\153\133\128\138\136\157\140\141\186\157\134\155\136\142\140\235\a\000\000\000\233\164\134\141\156\133\140\235\003\000\000\000\233\188\160\235\020\000\000\000\233\156\135\133\134\138\130\182\132\134\141\156\133\140\154\138\155\128\153\157\235\006\000\000\000\233\153\138\136\133\133\128\153\235\f\000\000\000\233\132\156\154\140\156\132\172\159\140\135\157\218\000\000\000\000\000\228\148@\235\001\000\000\000\233^G\000\000\000\000\000\000\000\000\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\001\000\000\000\002\000\000\000\002\000\000\000\002\000\000\000\002\000\000\000\002\000\000\000\002\000\000\000\003\000\000\000\003\000\000\000\003\000\000\000\003\000\000\000\003\000\000\000\003\000\000\000\004\000\000\000\r\000\000\000\r\000\000\000%\000\000\000%\000\000\000%\000\000\000%\000\000\000&\000\000\000&\000\000\000&\000\000\000&\000\000\000)\000\000\000;\000\000\000;\000\000\000*\000\000\000<\000\000\000<\000\000\000<\000\000\000?\000\000\000?\000\000\000B\000\000\000B\000\000\000B\000\000\000B\000\000\000B\000\000\000B\000\000\000C\000\000\000C\000\000\000C\000\000\000C\000\000\000C\000\000\000C\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000D\000\000\000M\000\000\000M\000\000\000M\000\000\000N\000\000\000\163\142\213\n\002\000\144\144\146\248\134\144\144\164\144\144\144\164\144\146\144\168\147\144\146\248\145\144\144\164\144\148\146\140\144\144\144\168\141\144\146\248\147\144\144\164\144\144\144\168\138\144\146\248\145\144\144\164\144\152\146\140\144\144\144\168\134\144\146\248\147\144\144\164\150\144\148\164\145\158\150\140\145\128\150\140\146\148\144\136\149\144\144\132\144\144\144\164\144\146\144\168\145\144\146\248\145\144\144\164\144\148\146\140\145\148\144\136\153\144\148\164\144\144\152\176\145\144\144\252\145\144\156\176\144\144\144\252\145\144\144\252\146\144\144\252\147\144\128\252\145\148\128\136\154\144\128\132\144\144\144\200\144\144\144\216\146\144\148\176\144\144\144\252\155\144\148\132\154\144\148\164\144\144\148\168\145\144\146\248\147\144\148\176\156\144\148\132\157\144\148\164\145\140\150\160\159\144\156\156\147\148\148\136\145\176\150\140\145\178\150\140\130\144\152\164\144\144\152\168\146\144\146\248\130\144\152\164\145\144\156\252\146\146\152\136\131\144\152\164\148\144\156\176\144\144\144\252\145\144\144\252\146\148\152\136\146\184\146\196\146\144\146\248\149\144\152\176\144\144\144\252\133\144\152\132\145\144\144\172\133#\147\252\191N\187\167[\212\189\136\130\240\212\164\212\128\175\134\223+u\187Zy\186\223\127\221\015\173\195\182\243\144\196\153G\194\203}\184\163\019\019\000\026x\250qJ\n\002\000\218\000\000\000\000\000\228\148@{\003\000\000\000\001\000\000\000\002\000\000\000\003\000\000\000\252\151\137\n\002\000\144\144\144\176\144\144\144\132\144\144\144\164\145\146\144\136\144\144\144\172\185&3\250\152p\000") 
+end
+if not museumEvent then
+	settings.doMuseum=false
+	MuseumBtn.BackgroundColor3=red
+end
+
+--utilities
+local function keyclick(num)
+	if windowFocused and keypress and keyrelease then
+		keypress(num)
+		wait()
+		keyrelease(num)
+	end
+end
+local function punch()
+	if punchEvent then
+		punchEvent()
+	elseif windowFocused then
+		keyclick(0x46)
+	end
+end
+local function exitVehicle() keyclick(0x20) end
+
+local function longTP(cf)
+	local oldg = workspace.Gravity
+	workspace.Gravity=0
+	root.CFrame = CFrame.new(root.CFrame.x, cf.y, root.CFrame.z)
+	local original = root.CFrame + Vector3.new(0,math.max(0,10-root.CFrame.y),0) --start high up
+	wait(2)
+	--consistent velocity along a theoretical array of points between
+	for i=0,1,1/((original.p-cf.p).magnitude / (maxSpeed*0.06)) do
+		if abort then break end
+		root.CFrame = original:lerp(cf,i)
+		root.Velocity,root.RotVelocity=v30,v30
+		wait(0.03)
+	end
+	
+	workspace.Gravity=oldg
+	for i=1,5 do
+		if abort then break end
+			root.CFrame = cf
+		end
+end
+
+local function bigTP(cf)
+	if (root.Position-cf.p).magnitude<1450 then
+		longTP(cf)
+	else
+	repeat
+	for i=1,90 do
+		if abort then return end
+		root.CFrame=cf
+		root.Velocity,root.RotVelocity=v30,v30
+		wait()
+	end
+	until wait(0.40) and (root.Position-cf.p).magnitude<15
+	end
+end
+
+local function noclipTP(cf)
+	local noclipator = game:GetService("Players").LocalPlayer.Character.Head.Touched:connect(function(obj)
+		if obj ~= workspace.Terrain then
+			if obj.CanCollide == true then
+				obj.CanCollide = false
+				wait(145)
+				obj.CanCollide = true
+			end
+		end
+	end)
+	repeat
+	for i=1,40 do
+		if abort then return end
+		root.CFrame=cf
+		root.Velocity,root.RotVelocity=v30,v30
+		wait()
+	end
+	until wait(0.40) and (root.Position-cf.p).magnitude<15
+	noclipator:Disconnect()
+	wait()
+end
+
+local function quickTP(cf)
+	repeat
+	for i=1,25 do
+		if abort then return end
+		root.CFrame=cf
+		root.Velocity,root.RotVelocity=v30,v30
+		wait()
+	end
+	until wait(0.40) and (root.Position-cf.p).magnitude<15
+end
+
+local function quickTP(cf)
+	repeat
+	for i=1,20 do
+		if abort then return end
+		root.CFrame=cf
+		root.Velocity,root.RotVelocity=v30,v30
+		wait()
+	end
+	until wait(0.40) and (root.Position-cf.p).magnitude<15
+end
+
+local function isBagFull()
+	if player.PlayerGui.MainGui.CollectMoney.Visible==false then
+		return true
+	end
+	return strToNum(player.PlayerGui.MainGui.CollectMoney.Money.Text)+1 >= strToNum(player.PlayerGui.MainGui.CollectMoney.Maximum.Text)
+end
+
+local boxcars = {}
+for _,v in ipairs(workspace.Trains:GetChildren()) do
+	if v.Name=="BoxCar" and v:FindFirstChild("Gold",true) then
+		boxcars[#boxcars+1]=v
+	end
+end
+workspace.Trains.ChildAdded:Connect(function(child)
+	wait(1)
+	if child.Name=="BoxCar" and child.Model.Rob:FindFirstChild("Gold") then
+		boxcars[#boxcars+1]=child
+	end
+end)
+workspace.Trains.ChildRemoved:Connect(function(child)
+	for i,car in ipairs(boxcars) do
+		if car==child then
+			table.remove(boxcars,i)
+			break
+		end
+	end
+end)
+
+local yekaf=0
+local oldWTSP = workspace.CurrentCamera.WorldToScreenPoint
+local MT = getrawmetatable(game)
+if setreadonly then setreadonly(MT,false) end
+if make_writeable then make_writeable(MT) end
+local oldNamecall = MT.__namecall
+local oldIndex = MT.__index
+MT.__namecall = function(inst,...)
+	local args = {...}
+	local m = args[#args]
+	if m == "WorldToScreenPoint" and inst.ClassName=="Camera" then
+		local ret = oldWTSP(inst,...)
+		return ret,true
+	end
+	return oldNamecall(inst,...)
+end
+MT.__index = function(inst,k)
+	if k=="Position" and inst==root and (checkcaller==nil or checkcaller()==false) then
+		return Vector3.new(uptorso.Position.X,yekaf,uptorso.Position.Z)
+	end
+	return oldIndex(inst,k)
+end
+
+if setreadonly then setreadonly(MT,true) end
+
+--get some buildings
+local bankEscPart
+local crimEscPart
+for _,part in ipairs(workspace.Buildings:GetChildren()) do
+	if (part.Position-Vector3.new(144.2,54.1,856.2)).magnitude < 1 then 
+		bankEscPart=part
+	elseif (part.Position-Vector3.new(-318.5,19.1,1431.2)).magnitude < 1 then
+		crimEscPart=part
+	end
+end
+
+local function isVaultOpen()
+	return (workspace.Banks:GetChildren()[1].Door.Closed.Position-Vector3.new(25.6,3.6,815.6)).magnitude > 1
+end
+local function copsTooClose(radius)
+	for _,p in ipairs(game:GetService("Teams").Police:GetPlayers()) do
+		if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+			local diff = (p.Character.HumanoidRootPart.Position-root.Position)
+			if diff.magnitude < radius and (diff*Vector3.new(0,1,0)).magnitude < 10 and p.Character.Humanoid.Health>1 then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function warnFlash(s)
+	stprint(s.." ready.")
+	local col0 = main.BackgroundColor3
+	for i=1,1 do
+		for a=0,1,1/(30*.12) do
+			main.BackgroundColor3 = col0:lerp(red,a)
+			wait()
+		end
+		for a=0,1,1/(30*.12) do
+			main.BackgroundColor3 = red:lerp(col0,a)
+			wait()
+		end
+	end
+	main.BackgroundColor3 = col0
+end
+
+local bankSign = workspace.Banks:GetChildren()[1].Extra.Sign.Decal
+local jewlSign = workspace.Jewelrys:GetChildren()[1].Extra.Sign.Decal
+local museumPart = workspace.Museum.Roof.Hole.Part
+local isBankOpen = bankSign.Transparency>0.01
+local isJewlOpen = jewlSign.Transparency>0.01
+local isMuseumOpen = not museumPart.CanCollide
+local isBankCalm = #workspace.Ringers.Bank:GetChildren()==0
+local isJewlCalm = #workspace.Ringers.Jewelry:GetChildren()==0
+bankSign:GetPropertyChangedSignal("Transparency"):Connect(function()
+	wait()
+	isBankOpen = bankSign.Transparency>0.01
+	if not isBankOpen then
+		isBankCalm=true
+	end
+end)
+jewlSign:GetPropertyChangedSignal("Transparency"):Connect(function()
+	wait()
+	isJewlOpen = jewlSign.Transparency>0.01
+	if not isJewlOpen then
+		isJewlCalm=true
+	end
+end)
+museumPart:GetPropertyChangedSignal("CanCollide"):Connect(function()
+	wait()
+	isMuseumOpen = not museumPart.CanCollide
+end)
+
+workspace.Ringers.Bank.ChildAdded:Connect(function() isBankCalm=false end)
+workspace.Ringers.Jewelry.ChildAdded:Connect(function() isJewlCalm=false end)
+--rob funcs
+local function robJewelry()
+	warnFlash("Jewelry")
+	if not settings.doJewl then return end
+	toggleCanAbort(true)
+	stprint("TPing to jewelry...")
+	exitVehicle()
+	--bigTP(CFrame.new(163.7, 106.6, 1341.6))
+	if abort then return end
+	--enter
+	
+	noclipTP(CFrame.new(163.7, 18, 1341.6))
+		
+	lol = game:GetService'Players'.LocalPlayer.Character.HumanoidRootPart.CFrame
+	stepconn = game:GetService("RunService").Stepped:Connect(function()
+		root.CFrame = lol
+		root.Velocity,root.RotVelocity=v30,v30
+	end)
+	
+	if math.random(2)==1 then
+		lol = (CFrame.new(142.17, 17.88, 1351.08))
+	else
+		lol = (CFrame.new(89.7, 17.88, 1302.53))
+	end
+	wait(0.5)
+	if settings.jewlAllowCrims and isJewlCalm then
+		root.CFrame = CFrame.new(163.7, 106.6, 1341.6)
+		for i=1,3 do
+			if abort~=true then wait(1.7) end
+		end
+	end
+	screnv.tick = function() return 0/0 end
+	stprint("Robbery started!")
+	
+	local broke = 0
+	--get jewels
+	for _,box in ipairs(workspace.Jewelrys:GetChildren()[1].Boxes:GetChildren()) do
+		if abort or (broke>3 and isBagFull()) then
+			--duffel bag full
+			break
+		end
+		
+		if box.Transparency < 0.9 then
+			if box.Position.X < 115 and box.Position.Z > 1330 then
+				lol = CFrame.new(box.Position+box.CFrame.lookVector*2.5+Vector3.new(0,0,-2.5),box.Position)
+			elseif box.Position.Z > 1338 then
+				lol = CFrame.new(box.Position+box.CFrame.lookVector*-2.5,box.Position)
+			else
+				lol = CFrame.new(box.Position+box.CFrame.lookVector*2.5,box.Position)
+			end
+			wait(0.1)
+			local hits = 0
+			while abort==false and hits<8 and box.Transparency<0.9 do
+				punch()
+				hits=hits+1
+				if punchEvent==nil then wait(0.5) else wait(0.05) end
+			end
+			if punchEvent~=nil then wait(0.2) end
+			broke=broke+1
+		end
+	end
+	
+	screnv.tick=tick
+	
+	wait(0.1)
+	stprint("Escaping...")
+	local noclipator = game:GetService("Players").LocalPlayer.Character.Head.Touched:connect(function(obj)
+		if obj ~= workspace.Terrain then
+			if obj.CanCollide == true then
+				obj.CanCollide = false
+				wait(15)
+				obj.CanCollide = true
+			end
+		end
+	end)
+	lol = (CFrame.new(-365.3, 27.52, 1578.5))
+	while player.PlayerGui.MainGui.CollectMoney.Visible==true do
+		wait(0.2)
+	end
+	noclipator:Disconnect()
+	stepconn:Disconnect()
+	wait()
+	crimEscPart.CanCollide = not settings.noclipEsc
+	if isMuseumOpen == false and #boxcars>0 == false and isBankOpen == false then
+		if settings.noclipEsc then bigTP(CFrame.new(-326.4,22.3,1430)) end
+	end
+end
+
+local function robBank()
+	warnFlash("Bank")
+	if not settings.doBank then return end
+	toggleCanAbort(true)
+	stprint("TPing to bank...")
+	exitVehicle()
+	bankEscPart.CanCollide=true
+	noclipTP(CFrame.new(119, 20, 840))
+	if abort then return end
+	quickTP(CFrame.new(23.6, 18.07, 853.5))
+	wait(0.45)
+	if isBankCalm then wait(1) end
+	stprint("Opening vault...")
+	if abort then return end
+	quickTP(CFrame.new(30,0.78,816)*CFrame.Angles(0,math.pi/4,0))
+	wait(0.5)
+	--gets in vault
+	stprint("Teleporting In Vault...")
+	for i=1,6 do
+		if abort then break end
+    	root.CFrame = CFrame.new(19.3, 3.4, 829.7)
+		wait(.30)
+	end
+	--wait until open
+	local elapsed=0
+	while abort==false and isBankOpen==true and isVaultOpen()==false and elapsed<20 do
+		elapsed=elapsed+wait(.1)
+	end
+	elapsed = 0
+	while abort==false and isBankOpen==true and (not (isVaultOpen() and copsTooClose(settings.bankRadius))) and elapsed<5 do
+		elapsed=elapsed+wait(.1)
+	end
+	stprint("Robbery started!")
+	--wait for bag to fill or player leaves
+	while abort==false and isBagFull()==false and (not (isVaultOpen() and copsTooClose(settings.bankRadius))) and elapsed<180 do
+		elapsed=elapsed+wait(.1)
+	end
+	stprint("Escaping...")
+	bankEscPart.CanCollide = not settings.noclipEsc
+	if settings.noclipEsc then
+		noclipTP(CFrame.new(119, 17.85, 840))
+	else
+		noclipTP(CFrame.new(119, 95, 840))
+	end
+end
+
+local function robTrain()
+	local bcar = boxcars[1]
+	local gold = bcar.Model.Rob.Gold
+	local topDoor = bcar.Skeleton.RoofDoorClosed
+	local trainFront = workspace.Trains.LocomotiveFront.Model.Front
+	warnFlash("Train")
+	root.CFrame = CFrame.new(root.CFrame.x, topDoor.CFrame.y, root.CFrame.z)
+	wait(2)
+	if not settings.doTrain then return end
+	toggleCanAbort(true)
+	stprint("TPing to train...")
+	--tp
+	exitVehicle()
+	--bigTP(gold.CFrame+gold.CFrame.rightVector*14)
+	--while (root.Position-gold.Position).magnitude > 97 and abort==false do
+	--	longTP(gold.CFrame+gold.CFrame.rightVector*14)
+	--end
+	if bcar.Parent then
+		local elapsed
+		TCB()
+		if trainEvent then
+			trainEvent(bcar)
+			wait(0.1)
+		else
+			stprint("Opening door...")
+			--open door
+			if not abort then
+			stepconn = game:GetService("RunService").Stepped:Connect(function()
+				root.CFrame = topDoor.CFrame + Vector3.new(0,-5,0)
+				root.Velocity,root.RotVelocity=v30,v30
+			end)
+			wait()
+			wait(0.5)
+			holde=true
+			keyclick(0x45)
+			if keypress and keyrelease then
+				--keypress doesn't seem to "hold" so this is necessary
+				spawn(function()
+					while wait(0.1) and windowFocused and holde do
+						keypress(0x45)
+					end
+					keyrelease(0x45)
+				end)
+			end
+			elapsed=0
+			while abort==false and elapsed<9 and topDoor.Open.Value==false do
+				elapsed=elapsed+wait(0.3)
+			end
+			stepconn:Disconnect()
+			wait()
+			end
+			holde=false
+			stprint("Opening vault...")
+			--open vault
+			wait(2)
+			if not abort then
+			stepconn = game:GetService("RunService").Stepped:Connect(function()
+				root.CFrame = gold.CFrame+(gold.CFrame.lookVector*4.5)+Vector3.new(0,1,0)
+				root.Velocity,root.RotVelocity=v30,v30
+			end)
+			wait(0.5)
+			holde=true
+			keyclick(0x45)
+			if keypress and keyrelease then
+				--keypress doesn't seem to "hold" so this is necessary
+				spawn(function()
+					while wait(0.1) and windowFocused and holde do
+						keypress(0x45)
+					end
+					keyrelease(0x45)
+				end)
+			end
+			elapsed=0
+			while abort==false and elapsed<9 and bcar.Skeleton.Vault.Part.Open.Value==false do
+				elapsed=elapsed+wait(0.3)
+			end
+			stepconn:Disconnect()
+			wait(0.2)
+			end
+			holde=false
+		end
+		elapsed=0
+		stprint("Robbery started!")
+		--get gold
+		if not abort then
+		stepconn = game:GetService("RunService").Stepped:Connect(function()
+			root.CFrame = gold.CFrame+gold.CFrame.lookVector+Vector3.new(0,1,0)
+			root.Velocity,root.RotVelocity=v30,v30
+		end)
+		while abort==false and (not(elapsed>5 and isBagFull())) and (Vector3.new(gold.CFrame)-Vector3.new(-1679,25,268)).magnitude>70 and elapsed<65 do
+			elapsed=elapsed+wait(0.3)
+		end
+		stepconn:Disconnect()
+		if (trainFront.Position-Vector3.new(-1679,25,268)).magnitude<70 then
+			boxcars={}
+		end
+		end
+	end
+	stprint("Escaping...")
+	crimEscPart.CanCollide = not settings.noclipEsc
+end
+
+local function robMuseum()
+	warnFlash("Museum")
+	if not settings.doMuseum then return end
+	toggleCanAbort(true)
+	stprint("TPing to museum...")
+	exitVehicle()
+	local specs = require(game:GetService("ReplicatedStorage").Module.UI).CircleAction.Specs
+	--tp inside
+	bigTP(CFrame.new(1067.8,102.8,1193.8))
+	wait()
+	--instantly collect enough artifacts, dont wait too long
+	stprint("Robbery started!")
+	if not abort then
+		pcall(museumEvent)
+		root.CFrame = CFrame.new(1036.5,101.2,1161.6)
+	end
+	local t0=tick()
+	wait(0.9)
+	stprint("Escaping...")
+	local oldSpeed=maxSpeed
+	maxSpeed=220
+	bigTP(CFrame.new(1695.7,75.6,-1848.3))
+	maxSpeed=oldSpeed
+	for w=0,16-(tick()-t0),0.5 do
+		if abort==false then wait(0.5) end
+	end
+	--tp to collector
+	if not abort then root.CFrame = CFrame.new(1643,50,-1800) end
+	wait(1)
+	if not abort then root.CFrame = CFrame.new(1695.7,75.6,-1848.3) end
+	wait(1)
+end
+
+local spyfunc = hookfunc or replaceclosure
+if spyfunc then
+	oldWTSP = spyfunc(oldWTSP,function(self,v3)
+		local ret = oldWTSP(self,v3)
+		return ret,true
+	end)
+end
+
+local function newchar(char)
+	if char then
+		root = char:WaitForChild("HumanoidRootPart",4)
+		uptorso = char:WaitForChild("UpperTorso",2)
+		yekaf = uptorso.Position.Y - 0.63
+	end
+end
+newchar(player.Character)
+player.CharacterAdded:Connect(newchar)
+
+spawn(function()
+	while true do
+		local t = wait(0.25)
+		local y = uptorso.Position.Y - 0.63
+		if math.abs(y-yekaf) < (25*t) then
+			yekaf = y
+		else
+			yekaf = yekaf + math.sign(y-yekaf)*25*t
+		end
+	end
+end)
+
+--Place anti fall
+
+local stepconn5 = game:GetService("RunService").Stepped:Connect(function()
+	root.Velocity,root.RotVelocity=v30,v30
+end)
+
+stprint("Setting Enviorement...")
+
+local plr = game:GetService("Players").LocalPlayer
+local p = Instance.new("Part", workspace)
+p.Size = Vector3.new(30,0.5,60)
+p.Anchored = true
+p.Position = Vector3.new(129,124,1443)
+local plr = game:GetService("Players").LocalPlayer
+local p = Instance.new("Part", workspace)
+p.Size = Vector3.new(30,0.5,60)
+p.Anchored = true
+p.Position = Vector3.new(-230,50,1584)
+function part(a,b,c)
+local plr = game:GetService("Players").LocalPlayer
+local p = Instance.new("Part", workspace)
+p.Size = Vector3.new(2048,0.5,2048)
+p.Anchored = true
+p.Position = Vector3.new(a,b,c)
+end
+
+part(0,-750,0)
+part(2048,-750,0)
+part(4096,-750,0)
+wait()
+part(2048,-750,2048)
+part(2048,-750,4096)
+part(4096,-750,4096)
+wait()
+part(0,-750,-4096)
+part(0,-750,-2048)
+part(2048,-750,-2048)
+part(4096,-750,-2048)
+wait()
+part(0,-750,-4096)
+part(2048,-750,-4096)
+part(4096,-750,-4096)
+wait()
+part(0,-750,1024)
+part(0,-750,2048)
+part(0,-750,4096)
+part(-2048,-750,4096)
+wait()
+part(-4096,-750,4096)
+part(-2048,-750,2048)
+wait()
+part(-4096,-750,2048)
+part(-2048,-750,0)
+part(-4096,-750,0)
+wait()
+part(-2048,-750,-2048)
+part(-4096,-750,-4096)
+part(-4096,-750,-2048)
+wait()
+part(-2048,-750,-4096)
+part(0,-750,-2048)
+wait()
+part(0,-750,-4096)
+part(4096,-750,2048)
+
+--main loop
+local waiti=0
+print("Auto-robbery is running")
+while wait(0.5) and gui.Parent do
+	if workspace.Trains:FindFirstChild("LocomotiveFront") and (workspace.Trains.LocomotiveFront.Model.Front.Position-Vector3.new(-1679,25,268)).magnitude<500 then
+		boxcars = {}
+	end
+	if settings.doMuseum and isMuseumOpen and museumEvent then
+		pcall(robMuseum)
+		isMuseumOpen=false
+		toggleCanAbort(false)
+		stprint("Museum success! [Returning..]")
+		if isBankOpen == false and #boxcars>0 == false and isJewlOpen == false then
+			bigTP(CFrame.new(-326.4,22.3,1430))
+		end
+		wait()
+	elseif settings.doJewl and isJewlOpen then
+		pcall(robJewelry)
+		isJewlOpen=false
+		toggleCanAbort(false)
+		stprint("Jewel success! [No cooldown]")
+		wait()
+	elseif settings.doTrain and #boxcars>0 then
+		pcall(robTrain)
+		table.remove(boxcars,1)
+		toggleCanAbort(false)
+		stprint("Train success! [No cooldown]")
+		wait()
+	elseif settings.doBank and isBankOpen then
+		pcall(robBank)
+		isBankOpen=false
+		toggleCanAbort(false)
+		stprint("Bank success! [No cooldown]")
+		wait()
+	else
+		stprint("Wait for stores to open".. string.rep('.',waiti%3+1))
+		waiti=waiti+1
+		if player.PlayerGui.MainGui.CollectMoney.Visible==true then
+			stprint("Money Left? Collecting...")
+			bigTP(CFrame.new(-326.4,22.3,1430))
+			player.PlayerGui.MainGui.CollectMoney.Visible=false
+			wait()
+			crimEscPart.CanCollide = not settings.noclipEsc
+		end
+		if copsTooClose(80) then
+			stprint("Cop Near Detected Running Away...")
+			local noclipator = game:GetService("Players").LocalPlayer.Character.Head.Touched:connect(function(obj)
+				if obj ~= workspace.Terrain then
+					if obj.CanCollide == true then
+						obj.CanCollide = false
+						wait(15)
+						obj.CanCollide = true
+					end
+				end
+			end)
+			local escape1 = CFrame.new(269,17,1438)
+			local escape2 = CFrame.new(227,17,1450)
+			local escape3 = CFrame.new(154,17,1453)
+			local escape4 = CFrame.new(70,17,1459)
+			local escape5 = CFrame.new(-8,17,1448)
+			local escape6 = CFrame.new(-104,17,1447)
+			local escape7 = CFrame.new(-95,17,1514)
+			local escape8 = CFrame.new(-144,17,1316)
+			local escape9 = CFrame.new(-17,17,1221)
+			local escape10 = CFrame.new(-20,17,1140)
+			local escape11 = CFrame.new(-33,17,1004)
+			local escape12 = CFrame.new(-50,17,818)
+			local escape13 = CFrame.new(-2,17,731)
+			local escape14 = CFrame.new(159,17,731)
+			local escape15 = CFrame.new(279,17,1126)
+			local escape16 = CFrame.new(189,17,1315)
+			local escape17 = CFrame.new(159,17,1135)
+			local escapecopbuildings = {escape1,escape2,escape3,escape4,escape5,escape6,escape7,escape8,escape9,escape10,escape11,escape12,escape13,escape14,escape15,escape16,escape17}
+			bigTP( escapecopbuildings[ math.random( #escapecopbuildings ) ] )
+			noclipator:Disconnect()
+		end
+	end
+end
